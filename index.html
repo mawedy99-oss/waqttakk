@@ -1,0 +1,2031 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Waqtk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: RTL single column on phones with a bottom tab bar; a sticky top bar and a centered 1180px frame on desktop. */
+:root {
+  --bg: #F5F7F8; --surface: #FFFFFF; --fg: #1A1A2E; --muted: #6B7280;
+  --primary: #A8497A; --primary-dark: #7A3560; --soft: #F8EEF2; --line: #EDE3E8;
+  --ok: #15803D; --warn: #B45309; --bad: #B91C1C; --shadow: 0 1px 2px rgba(26,26,46,.05), 0 6px 18px rgba(26,26,46,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #140C12; --surface: #211520; --fg: #F7EEF3; --muted: #B8A3B0;
+    --primary: #D98AAA; --primary-dark: #F0B7CC; --soft: #34192A; --line: #3A2433; --ok: #4ADE80; --warn: #FBBF24; --bad: #F87171; --shadow: none;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #140C12; --surface: #211520; --fg: #F7EEF3; --muted: #B8A3B0;
+  --primary: #D98AAA; --primary-dark: #F0B7CC; --soft: #34192A; --line: #3A2433; --ok: #4ADE80; --warn: #FBBF24; --bad: #F87171; --shadow: none;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: "Rubik", "Segoe UI", Tahoma, Arial, sans-serif; font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h1 { font-size: 20px; font-weight: 700; }
+h2 { font-size: 17px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 600; }
+.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.i.sm { width: 16px; height: 16px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.price { font-weight: 700; font-variant-numeric: tabular-nums; }
+.price small { font-size: 11px; color: var(--muted); font-weight: 500; }
+.old { text-decoration: line-through; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* ---------- Shell ---------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.topbar-in { max-width: 1180px; margin: 0 auto; height: 60px; display: flex; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--primary); font-size: 17px; white-space: nowrap; }
+.brand-mark { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #B9557F, #7A3560); color: #fff; display: grid; place-items: center; font-size: 15px; }
+.nav-links { display: none; gap: 4px; margin-inline-start: 12px; }
+.nav-links button { padding: 8px 12px; border-radius: 999px; color: var(--muted); font-weight: 500; display: flex; gap: 6px; align-items: center; }
+.nav-links button[aria-current="page"] { color: var(--primary); background: var(--soft); font-weight: 700; }
+.top-actions { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
+.icon-btn { position: relative; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); }
+.dot { position: absolute; top: -4px; inset-inline-end: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.dot:empty { display: none; }
+.main { max-width: 1180px; margin: 0 auto; padding-block: 16px 110px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); min-width: 0; }
+.tabbar {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 10; background: var(--surface); border-top: 1px solid var(--line);
+  display: flex; justify-content: space-around; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+.tabbar button { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--muted); min-width: 0; flex: 1; font-weight: 500; }
+.tabbar button[aria-current="page"] { color: var(--primary); font-weight: 700; }
+.tabbar .i { width: 22px; height: 22px; }
+.toast {
+  position: fixed; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s; z-index: 30; max-width: calc(100% - 32px); text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (min-width: 760px) {
+  .nav-links { display: flex; }
+  .tabbar { display: none; }
+  .main { padding-bottom: 40px; }
+}
+
+/* ---------- Primitives ---------- */
+.section { margin-top: 28px; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.section-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.link { color: var(--primary); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); min-width: 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 14px; font-weight: 700; background: linear-gradient(135deg, #B9557F, var(--primary-dark)); color: #fff; box-shadow: 0 6px 16px rgba(197,17,98,.22); white-space: nowrap; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; border-radius: 12px; }
+.btn.ghost { background: var(--surface); color: var(--primary); border: 1.5px solid var(--primary); box-shadow: none; }
+.btn.block { width: 100%; }
+.btn.danger { background: var(--bad); box-shadow: none; }
+.btn:disabled { opacity: .6; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 500; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.chip[aria-pressed="true"], .chip.on { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600; }
+.row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.row::-webkit-scrollbar { display: none; }
+.row > * { flex: none; scroll-snap-align: start; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 620px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 940px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.badge { position: absolute; top: 10px; inset-inline-start: 10px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 8px; }
+.tag { display: inline-flex; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--soft); color: var(--primary); }
+.status { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.status.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.status.wait { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+.status.bad { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.status.mute { background: var(--line); color: var(--muted); }
+
+/* placeholder image blocks (no photos available) */
+.ph { position: relative; aspect-ratio: 4 / 3; border-radius: 14px 14px 0 0; overflow: hidden; display: grid; place-items: center;
+  background: radial-gradient(120% 90% at 20% 10%, hsl(var(--h) 40% 96%), hsl(var(--h) 28% 88%)); color: hsl(var(--h) 30% 38%); }
+.ph .i { width: 38px; height: 38px; opacity: .8; }
+.ph.sq { aspect-ratio: 1 / 1; }
+.ph.rounded { border-radius: 14px; }
+.fav { position: absolute; top: 10px; inset-inline-end: 10px; width: 34px; height: 34px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; color: var(--muted); box-shadow: var(--shadow); }
+.fav.on { color: var(--primary); }
+.fav.on .i { fill: currentColor; }
+
+/* item cards */
+.item { overflow: hidden; display: flex; flex-direction: column; }
+.item .body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.item .cat { font-size: 12px; color: var(--primary); font-weight: 600; }
+.item .meta { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12px; }
+.item .meta .i { width: 14px; height: 14px; color: #C0605F; fill: #C0605F; stroke: #C0605F; }
+.item .row-between { margin-top: auto; padding-top: 6px; }
+.row .card.item.w { width: 200px; }
+.row .card.item.w.wide { width: 230px; }
+.grid > * { min-width: 0; }
+.grid .card.item { height: 100%; }
+
+/* hero & banners */
+.hero { position: relative; border-radius: 22px; overflow: hidden; min-height: 210px; color: #fff; }
+.slide { position: absolute; inset: 0; padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 8px; opacity: 0; transition: opacity .6s; background: linear-gradient(120deg, #B9557F 0%, #7A3560 100%); }
+.slide.on { opacity: 1; }
+.slide.s2 { background: linear-gradient(120deg, #F06292 0%, #AD1457 100%); }
+.slide.s3 { background: linear-gradient(120deg, #C2185B 0%, #6A1B4D 100%); }
+.slide h2 { font-size: 24px; max-width: 16ch; }
+.slide p { margin: 0; opacity: .9; max-width: 36ch; font-size: 14px; }
+.slide .btn { background: #fff; color: var(--primary-dark); box-shadow: none; align-self: flex-start; margin-top: 4px; }
+.dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+.dots button { width: 7px; height: 7px; border-radius: 999px; background: var(--line); }
+.dots button[aria-current="true"] { width: 22px; background: var(--primary); }
+.hero-meta { position: absolute; inset-inline-start: 0; bottom: 0; }
+@media (min-width: 760px) { .slide { padding: 40px; } .slide h2 { font-size: 34px; } .hero { min-height: 280px; } }
+
+/* header greeting */
+.greet { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.avatar { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--soft), var(--line)); display: grid; place-items: center; color: var(--primary); font-weight: 800; flex: none; }
+.greet .loc { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.greet .loc .i { width: 16px; height: 16px; }
+
+/* quick actions */
+.quick { display: grid; grid-template-columns: repeat(5, 1fr); padding: 10px 6px; }
+.quick button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; position: relative; padding: 6px 2px; min-width: 0; }
+.quick button + button { border-inline-start: 1px solid var(--line); }
+.quick .new { position: absolute; top: -2px; inset-inline-end: 6px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+.quick .i { color: var(--primary); }
+
+/* promo tiles */
+.promos { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 620px) { .promos { grid-template-columns: repeat(3, 1fr); } }
+.promo { border-radius: 18px; padding: 16px; min-height: 130px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; color: var(--fg); text-align: start; border: 1px solid var(--line); }
+.promo h3 { font-size: 16px; font-weight: 700; }
+.promo p { margin: 0; font-size: 13px; color: var(--muted); }
+.promo .btn { min-height: 34px; font-size: 12px; align-self: flex-start; padding: 0 12px; border-radius: 10px; }
+.p1 { background: linear-gradient(135deg, #FDE7EF, #F8BBD0); }
+.p2 { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+.p3 { background: linear-gradient(135deg, #FCE4EC, #F48FB1); }
+:root[data-theme="dark"] .p1 { background: #34192A; } :root[data-theme="dark"] .p2 { background: #3A2A1E; } :root[data-theme="dark"] .p3 { background: #3A1E2C; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .p1 { background: #34192A; } :root:not([data-theme="light"]) .p2 { background: #3A2A1E; } :root:not([data-theme="light"]) .p3 { background: #3A1E2C; } }
+
+/* categories */
+.cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (min-width: 620px) { .cats { grid-template-columns: repeat(4, 1fr); } }
+.cat-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.cat-tile .ico { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; }
+
+/* trust strip */
+.trust { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 760px) { .trust { grid-template-columns: repeat(4, 1fr); } }
+.trust div { display: flex; gap: 10px; align-items: center; padding: 12px; font-size: 13px; font-weight: 600; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.trust .i { color: var(--primary); }
+
+/* salon cards */
+.salon { width: 220px; overflow: hidden; display: flex; flex-direction: column; }
+.salon .body { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.salon .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.salon .tags span { font-size: 11px; padding: 2px 8px; border-radius: 8px; background: var(--line); color: var(--muted); }
+.featured { position: absolute; top: 10px; inset-inline-start: 10px; background: #F5B301; color: #3B2A00; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 8px; }
+.dist { font-size: 12px; color: var(--muted); }
+
+/* lists */
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.list-row { display: flex; align-items: center; gap: 12px; padding: 14px; width: 100%; text-align: start; border-bottom: 1px solid var(--line); min-width: 0; }
+.list-row:last-child { border-bottom: 0; }
+.list-row .ico { width: 38px; height: 38px; border-radius: 12px; background: var(--soft); color: var(--primary); display: grid; place-items: center; flex: none; }
+.list-row .txt { flex: 1; min-width: 0; }
+.list-row .chev { color: var(--muted); }
+.list-row.danger { color: var(--bad); }
+.list-row.danger .ico { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
+
+/* segmented tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs button { padding: 12px 14px; color: var(--muted); font-weight: 500; position: relative; white-space: nowrap; display: flex; gap: 6px; align-items: center; }
+.tabs button[aria-selected="true"] { color: var(--primary); font-weight: 700; }
+.tabs button[aria-selected="true"]::after { content: ""; position: absolute; inset-inline: 8px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--primary); }
+.count { font-size: 11px; background: var(--primary); color: #fff; border-radius: 999px; padding: 1px 6px; font-weight: 700; }
+
+/* page header */
+.page-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.page-h .back { display: flex; align-items: center; gap: 6px; color: var(--fg); font-weight: 600; }
+
+/* bookings */
+.bk { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.bk-top { display: flex; gap: 12px; align-items: flex-start; }
+.bk-top .ph { width: 76px; height: 76px; aspect-ratio: auto; border-radius: 14px; flex: none; }
+.bk-top .ph .i { width: 24px; height: 24px; }
+.bk-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.ref { font-size: 11px; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px; align-self: flex-start; font-variant-numeric: tabular-nums; }
+.bk-meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.bk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bk-actions .wide { grid-column: 1 / -1; }
+.note { padding: 12px 14px; border-radius: 14px; background: var(--soft); color: var(--fg); font-size: 13px; display: flex; gap: 10px; align-items: center; }
+.note .i { color: var(--primary); }
+
+/* product detail row */
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.qty button { width: 34px; height: 34px; font-size: 18px; color: var(--primary); }
+.qty span { min-width: 30px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* forms */
+.form { padding: 16px; display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 680px) { .form { grid-template-columns: 1fr 1fr; } .form .full { grid-column: 1 / -1; } }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.field input, .field select {
+  height: 48px; border-radius: 12px; border: 1px solid #F48FB1; background: var(--surface); padding: 0 14px; width: 100%; min-width: 0;
+}
+:root[data-theme="dark"] .field input, :root[data-theme="dark"] .field select { border-color: #6B2D4D; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .field input, :root:not([data-theme="light"]) .field select { border-color: #6B2D4D; } }
+.field input::placeholder { color: var(--muted); opacity: .7; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-bottom: 1px solid var(--line); }
+.switch-row:last-child { border-bottom: 0; }
+.switch { width: 46px; height: 28px; border-radius: 999px; background: var(--line); position: relative; flex: none; transition: background .2s; }
+.switch::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+.switch[aria-checked="true"] { background: var(--primary); }
+.switch[aria-checked="true"]::after { transform: translateX(-18px); }
+:root[dir="rtl"] .switch[aria-checked="true"]::after { transform: translateX(-18px); }
+
+/* payment */
+.pay-card { display: flex; align-items: center; gap: 12px; padding: 14px; border-bottom: 1px solid var(--line); width: 100%; text-align: start; }
+.pay-card:last-child { border-bottom: 0; }
+.pay-card .brand-chip { width: 52px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #1F2937, #374151); color: #fff; font-size: 11px; font-weight: 800; display: grid; place-items: center; letter-spacing: .5px; flex: none; }
+.radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); flex: none; display: grid; place-items: center; }
+.radio.on { border-color: var(--primary); }
+.radio.on::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+.secure { display: flex; gap: 10px; align-items: center; padding: 14px; border: 1px dashed var(--primary); border-radius: 14px; font-size: 13px; color: var(--fg); }
+
+/* points & coupons */
+.points-hero { padding: 18px; background: linear-gradient(135deg, #B9557F, #7A3560); color: #fff; border: 0; }
+.points-hero .big { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.stats3 div { background: rgba(255,255,255,.14); border-radius: 12px; padding: 10px; text-align: center; font-size: 12px; }
+.stats3 b { display: block; font-size: 17px; font-variant-numeric: tabular-nums; }
+.coupon { display: grid; grid-template-columns: 1fr 96px; overflow: hidden; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+.coupon .c-main { padding: 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.coupon .c-val { background: var(--primary); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; }
+.coupon .c-val small { font-size: 11px; font-weight: 600; }
+.coupon.gold .c-val { background: #E08A00; } .coupon.gray .c-val { background: #9CA3AF; }
+.coupon.gray { opacity: .75; }
+
+/* stats tiles */
+.tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.tiles button, .tiles div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px; text-align: center; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.tiles b { font-size: 17px; color: var(--fg); font-variant-numeric: tabular-nums; }
+.tiles .i { color: var(--primary); width: 20px; height: 20px; }
+.orders4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.orders4 button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 14px 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.orders4 .i { color: var(--primary); }
+
+/* login */
+.auth { max-width: 420px; margin: 24px auto 0; padding: 28px 22px; text-align: center; }
+.auth .brand-mark { width: 64px; height: 64px; margin: 0 auto 14px; font-size: 26px; }
+.auth h1 { color: var(--primary); font-size: 22px; }
+.auth form { display: flex; flex-direction: column; gap: 14px; margin-top: 22px; text-align: start; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; margin: 18px 0; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.gbtn { width: 100%; min-height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
+
+/* search */
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 0 14px; height: 52px; }
+.search input { border: 0; outline: none; background: transparent; flex: 1; min-width: 0; height: 100%; }
+.search .i { color: var(--muted); }
+
+/* cart */
+.cart-line { display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; padding: 12px; border-bottom: 1px solid var(--line); }
+.cart-line:last-child { border-bottom: 0; }
+.cart-line .ph { aspect-ratio: 1; border-radius: 12px; }
+.summary { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.summary .row-between { font-size: 14px; }
+
+.empty { text-align: center; padding: 36px 16px; color: var(--muted); }
+.empty .i { width: 40px; height: 40px; color: var(--primary); margin-bottom: 8px; }
+.split { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .split { grid-template-columns: 1fr 320px; align-items: start; } .sticky { position: sticky; top: 84px; } }
+.sample { font-size: 11px; color: var(--muted); }
+.page-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.page-title p { margin: 0; color: var(--muted); font-size: 13px; }
+.big-h { font-size: 22px; color: var(--primary); }
+section[id] { scroll-margin-top: 80px; }
+.cat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 620px) { .cat-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.cat-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 10px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: var(--shadow); min-width: 0; }
+.cat-ico { width: 84px; height: 84px; border-radius: 18px; display: grid; place-items: center; }
+.cat-ico .i { width: 36px; height: 36px; }
+.cat-name { font-weight: 700; font-size: 15px; text-align: center; }
+@media (max-width: 520px) {
+  .brand > span:last-child { display: none; }
+  .top-actions { gap: 6px; }
+  .icon-btn { width: 38px; height: 38px; }
+  .top-actions .btn { padding: 0 10px; min-height: 36px; font-size: 12px; }
+}
+/* ---- Booking & detail screens ---- */
+.bk-steps { display: flex; align-items: center; gap: 6px; margin: 6px 0 16px; }
+.bk-steps span { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--soft); color: var(--muted); flex: none; }
+.bk-steps span.on { background: var(--primary); color: #fff; }
+.bk-steps i { flex: 1; height: 2px; background: var(--line); border-radius: 2px; }
+.bk-steps i.on { background: var(--primary); }
+.bk-title { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.pick { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface); text-align: start; margin-bottom: 10px; min-width: 0; }
+.pick[aria-checked="true"] { border-color: var(--primary); background: var(--soft); }
+.pick .av { width: 46px; height: 46px; border-radius: 50%; flex: none; background: linear-gradient(135deg, hsl(var(--h) 38% 62%), hsl(var(--h) 34% 40%)); color: #fff; display: grid; place-items: center; font-weight: 700; }
+.pick .txt { flex: 1; min-width: 0; }
+.pick .txt b { display: block; font-size: 14px; }
+.pick .txt small { color: var(--muted); font-size: 12px; }
+.pick .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+.pick[aria-checked="true"] .radio { border-color: var(--primary); background: radial-gradient(var(--primary) 45%, transparent 50%); }
+.dates { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 14px; }
+.dates::-webkit-scrollbar { display: none; }
+.dchip { flex: none; width: 66px; padding: 10px 6px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface); text-align: center; color: var(--fg); }
+.dchip small { display: block; color: var(--muted); font-size: 11px; }
+.dchip b { font-size: 18px; }
+.dchip[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.dchip[aria-pressed="true"] small { color: #fff; opacity: .85; }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.slot { min-height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 600; color: var(--fg); }
+.slot[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.slot:disabled { background: var(--soft); color: var(--muted); text-decoration: line-through; opacity: .6; }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin: 10px 0 0; }
+.sum { padding: 6px 16px; }
+.sum .r { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.sum .r:last-child { border-bottom: 0; }
+.sum .r span { color: var(--muted); }
+.sum .r b { text-align: end; min-width: 0; }
+.check-row { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--muted); margin: 14px 0; cursor: pointer; }
+.check-row input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--primary); flex: none; }
+.bk-foot { display: flex; gap: 10px; margin-top: 18px; }
+.bk-foot .btn { flex: 1; }
+.stt { display: inline-flex; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--soft); color: var(--primary); }
+.stt.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.stt.wait { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+.stt.bad { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.stt.mute { background: var(--soft); color: var(--muted); }
+.stars { display: inline-flex; gap: 4px; }
+.stars button { width: 36px; height: 36px; display: grid; place-items: center; color: #E0B43A; }
+.stars .i { width: 22px; height: 22px; fill: transparent; stroke: #E0B43A; }
+.stars button.on .i { fill: #E0B43A; }
+.bubbles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.bub { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; background: var(--surface); border: 1px solid var(--line); }
+.bub.me { align-self: flex-start; background: var(--primary); color: #fff; border-color: transparent; border-bottom-right-radius: 4px; }
+.bub.them { align-self: flex-end; border-bottom-left-radius: 4px; }
+.bub small { display: block; font-size: 10px; opacity: .7; margin-top: 4px; }
+.chat-bar { display: flex; gap: 8px; position: sticky; bottom: 0; padding: 10px 0; background: var(--bg); }
+.chat-bar input { flex: 1; min-height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); padding: 0 14px; color: var(--fg); font: inherit; min-width: 0; }
+.map-box { position: relative; height: 200px; border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, var(--soft), var(--surface)); border: 1px solid var(--line); display: grid; place-items: center; }
+.map-box .grid-lines { position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 36px 36px; opacity: .6; }
+.map-box .pin-big { position: relative; width: 44px; height: 44px; color: var(--primary); }
+.map-box .pin-big .i { width: 44px; height: 44px; }
+.faq details { border-bottom: 1px solid var(--line); padding: 14px 0; }
+.faq details:last-child { border-bottom: 0; }
+.faq summary { cursor: pointer; font-weight: 700; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq details p { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.addr-card { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-bottom: 1px solid var(--line); min-width: 0; }
+.addr-card:last-child { border-bottom: 0; }
+.addr-card .ico { width: 38px; height: 38px; border-radius: 12px; background: var(--soft); color: var(--primary); display: grid; place-items: center; flex: none; }
+.addr-card .txt { flex: 1; min-width: 0; }
+.addr-card .txt b { display: block; }
+.addr-card .txt small { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.form-card { padding: 16px; display: grid; gap: 12px; margin-top: 12px; }
+.steps-v { display: grid; gap: 14px; }
+.steps-v div { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; }
+.steps-v div span { width: 26px; height: 26px; border-radius: 50%; background: var(--soft); color: var(--primary); display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+.steps-v div.on span { background: var(--primary); color: #fff; }
+.pill-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.note-box { padding: 12px 14px; border-radius: 14px; background: var(--soft); color: var(--fg); font-size: 13px; line-height: 1.7; }
+.detail-hero { position: relative; border-radius: 18px; overflow: hidden; }
+.detail-hero .ph { aspect-ratio: 16 / 9; border-radius: 18px; }
+.detail-hero .fav { top: 12px; }
+.kv { display: grid; gap: 0; }
+.kv div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span { color: var(--muted); }
+.kv b { text-align: end; min-width: 0; overflow-wrap: anywhere; }
+.article-body p { line-height: 1.9; font-size: 15px; margin: 0 0 14px; max-width: 65ch; }
+.ok-hero { text-align: center; padding: 28px 16px; }
+.ok-hero .big { width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 14px; background: var(--primary); color: #fff; display: grid; place-items: center; }
+.ok-hero .big .i { width: 40px; height: 40px; stroke: #fff; }
+.ok-hero h2 { margin: 0 0 6px; }
+.field textarea { min-height: 84px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); padding: 12px 14px; font: inherit; color: var(--fg); resize: vertical; width: 100%; }
+.field select { min-height: 44px; }
+.mini-stars { color: #E0B43A; font-size: 13px; letter-spacing: 2px; }
+.map-live { height: 260px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--soft); }
+.map-live svg text { font-family: inherit; }
+.dist-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
+.live-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); padding: 9px 12px; border-radius: 12px; background: var(--soft); margin-bottom: 12px; }
+.live-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.live-bar.on { color: var(--fg); }
+.live-bar.on .dot { background: var(--ok); }
+.typing { letter-spacing: 3px; color: var(--muted); }
+.emo-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); margin-bottom: 8px; }
+.emo-grid button { font-size: 20px; height: 36px; border-radius: 8px; }
+.emo-grid button:hover { background: var(--soft); }
+.gal-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.gal-strip button { border-radius: 12px; overflow: hidden; padding: 0; }
+.gal-strip .ph { aspect-ratio: 1; border-radius: 12px; }
+.gal-stage { position: relative; touch-action: pan-y; user-select: none; }
+.gal-stage .ph { width: 100%; }
+.gal-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: var(--surface); box-shadow: var(--shadow); display: grid; place-items: center; }
+.gal-nav.prev { inset-inline-start: 10px; }
+.gal-nav.next { inset-inline-end: 10px; }
+.gal-dots { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+.gal-dots button { width: 9px; height: 9px; border-radius: 6px; background: var(--line); padding: 0; }
+.gal-dots button[aria-pressed="true"] { background: var(--primary); width: 22px; }
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="brand" data-go="home" aria-label="Waqtk">
+      <span class="brand-mark">B</span><span>Waqtk</span>
+    </button>
+    <nav class="nav-links" aria-label="التنقل الرئيسي">
+      <button data-go="home" data-nav="home">الرئيسية</button>
+      <button data-go="store" data-nav="store">المتجر</button>
+      <button data-go="favorites" data-nav="favorites">المفضلة</button>
+      <button data-go="bookings" data-nav="bookings">حجوزاتي</button>
+      <button data-go="search" data-nav="search">البحث</button>
+      <button data-go="profile" data-nav="profile">الملف الشخصي</button>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" data-jump="sec-offers" aria-label="العروض"><svg class="i" viewBox="0 0 24 24"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-2-3-5-3-5-1s5 1 5 1zM12 7c2-3 5-3 5-1s-5 1-5 1z"/></svg></button>
+      <button class="icon-btn" data-jump="sec-near" aria-label="قريب مني"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></button>
+      <button class="icon-btn" data-go="notifications" aria-label="الإشعارات"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg><span class="dot" data-unread></span></button>
+      <button class="icon-btn" data-go="cart" aria-label="السلة"><svg class="i" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H7M9 19h.01M17 19h.01"/></svg><span class="dot" data-cartcount></span></button>
+      <button class="btn sm" data-act="auth" id="authBtn">تسجيل الدخول</button>
+    </div>
+  </div>
+</header>
+
+<main class="main" id="app" aria-live="polite"></main>
+
+<nav class="tabbar" aria-label="التبويبات">
+  <button data-go="home" data-nav="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>الرئيسية</button>
+  <button data-go="store" data-nav="store"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16l-1 13H5zM8 7a4 4 0 0 1 8 0"/></svg>المتجر</button>
+  <button data-go="favorites" data-nav="favorites"><svg class="i" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>المفضلة</button>
+  <button data-go="bookings" data-nav="bookings"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg>حجوزاتي</button>
+  <button data-go="search" data-nav="search"><svg class="i" viewBox="0 0 24 24"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5"/></svg>البحث</button>
+  <button data-go="profile" data-nav="profile"><svg class="i" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1-4 4-6 8-6s7 2 8 6"/></svg>الملف</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  // ---------- Sample data (demo only; the real app loads these from the server) ----------
+  const SERVICES = [
+    { id: 's1', name: 'تنظيف بشرة عميق', center: 'صالون لمسة جمال', rating: 4.9, price: 105, old: 150, disc: 30, cat: 'البشرة', hue: 330, dur: 60, featured: true },
+    { id: 's2', name: 'صبغة + علاج', center: 'صالون زهرة', rating: 4.6, price: 187, old: 250, disc: 25, cat: 'الشعر', hue: 280, dur: 90 },
+    { id: 's3', name: 'مانيكير + بادكير', center: 'صالون النخبة', rating: 4.7, price: 120, old: 150, disc: 20, cat: 'الأظافر', hue: 350, dur: 75 },
+    { id: 's4', name: 'تبييض أسنان', center: 'عيادة الابتسامة', rating: 4.8, price: 150, old: 200, disc: 25, cat: 'الأسنان', hue: 200, dur: 45 },
+    { id: 's5', name: 'استشارة تغذية', center: 'مركز تغذية الحياة', rating: 4.5, price: 60, old: null, disc: 10, cat: 'الصحة', hue: 160, dur: 30 },
+    { id: 's6', name: 'مكياج سهرة', center: 'صالون لمسة جمال', rating: 4.8, price: 75, old: null, disc: 0, cat: 'المكياج', hue: 20, dur: 60 },
+    { id: 'f1', name: 'اشتراك شهري في الصالة', center: 'نادي أفق الرياضي', rating: 4.6, price: 35000, old: 45000, disc: 22, cat: 'اللياقة', hue: 140, dur: 30 },
+    { id: 'f2', name: 'تدريب شخصي (جلسة)', center: 'نادي أفق الرياضي', rating: 4.9, price: 25000, old: null, disc: 0, cat: 'اللياقة', hue: 150, dur: 60 },
+    { id: 'f3', name: 'حصة يوغا جماعية', center: 'استوديو توازن', rating: 4.7, price: 10000, old: null, disc: 0, cat: 'اللياقة', hue: 170, dur: 60 },
+    { id: 'f4', name: 'برنامج لياقة وتغذية', center: 'مركز الحياة الصحي', rating: 4.5, price: 50000, old: 60000, disc: 17, cat: 'اللياقة', hue: 130, dur: 45 }
+  ];
+  const PRODUCTS = [
+    { id: 'p1', name: 'كريم ترطيب Hyaluronic', brand: 'العناية بالبشرة', rating: 4.6, n: 210, price: 95, old: 120, disc: 21, cat: 'البشرة', hue: 260 },
+    { id: 'p2', name: 'سيروم فيتامين C', brand: 'العناية بالبشرة', rating: 4.8, n: 320, price: 69, old: 89, disc: 22, cat: 'البشرة', hue: 30 },
+    { id: 'p3', name: 'عطر زهري فاخر', brand: 'العطور', rating: 4.7, n: 88, price: 149, old: 180, disc: 17, cat: 'العطور', hue: 340 },
+    { id: 'p4', name: 'مجموعة مكياج احترافية', brand: 'المكياج', rating: 4.9, n: 145, price: 199, old: 249, disc: 20, cat: 'المكياج', hue: 15 },
+    { id: 'p5', name: 'طلاء أظافر Premium Set', brand: 'الأظافر', rating: 4.3, n: 64, price: 89, old: null, disc: 0, cat: 'الأظافر', hue: 300 },
+    { id: 'p6', name: 'قناع ترطيب يومي', brand: 'العناية بالبشرة', rating: 4.5, n: 52, price: 45, old: 60, disc: 15, cat: 'البشرة', hue: 180 }
+  ];
+  const SALONS = [
+    { id: 'sa1', name: 'صالون لمسة جمال', area: 'الكرادة', rating: 4.8, n: 128, dist: '1.2 كم', tags: ['عناية بالبشرة', 'مكياج', 'شعر'], hue: 335, featured: true },
+    { id: 'sa2', name: 'صالون زهرة', area: 'المنصور', rating: 4.5, n: 74, dist: '3.4 كم', tags: ['شعر', 'أظافر'], hue: 290 },
+    { id: 'sa3', name: 'سبا نوفا', area: 'الجادرية', rating: 4.7, n: 96, dist: '5.1 كم', tags: ['استرخاء', 'تدليك'], hue: 200, featured: true }
+  ];
+  const BOOKINGS = [
+    { id: 'BZ-1287', svc: 'تنظيف بشرة عميق', center: 'صالون لمسة جمال', date: 'الأحد، 26 مايو 2024', time: '04:00 م', dur: 60, price: 105, state: 'upcoming', status: 'ok', label: 'مؤكد', hue: 330 },
+    { id: 'BZ-1289', svc: 'مانيكير + بادكير', center: 'صالون النخبة', date: 'الخميس، 30 مايو 2024', time: '02:30 م', dur: 75, price: 120, state: 'upcoming', status: 'wait', label: 'بانتظار التأكيد', hue: 350 },
+    { id: 'BZ-1288', svc: 'صبغة شعر كاملة', center: 'صالون لمسة جمال', date: 'الثلاثاء، 28 مايو 2024', time: '11:00 ص', dur: 90, price: 187, state: 'past', status: 'mute', label: 'مكتمل', hue: 280 },
+    { id: 'BZ-1245', svc: 'استشارة تغذية', center: 'مركز تغذية الحياة', date: 'الأربعاء، 15 مايو 2024', time: '09:00 ص', dur: 30, price: 60, state: 'cancelled', status: 'bad', label: 'ملغى', hue: 160 }
+  ];
+  const COUPONS = [
+    { title: 'خصم 20% على جميع الخدمات', min: 200, until: '30 يونيو 2025', val: '20%', st: 'available', cls: '' },
+    { title: 'خصم 30 IQD على الطلبات', min: 150, until: '15 مايو 2025', val: '30', unit: 'IQD', st: 'available', cls: 'gold' },
+    { title: 'خصم 15% على جميع الخدمات', min: 150, until: 'انتهى 10 أبريل 2025', val: '15%', st: 'expired', cls: 'gray' }
+  ];
+  const NOTIFS = [
+    { g: 'اليوم', type: 'offer', t: 'عرض جديد لك!', d: 'خصم 20% على جميع خدمات العناية بالشعر', time: '09:15 ص', unread: true },
+    { g: 'اليوم', type: 'wallet', t: 'تم إضافة رصيد', d: 'تمت إضافة 200 IQD إلى محفظتك', time: '08:45 ص', unread: true },
+    { g: 'أمس', type: 'order', t: 'طلبك في الطريق', d: 'طلب رقم #1256 في الطريق إليك', time: '07:20 م' },
+    { g: 'أمس', type: 'offer', t: 'لا تفوتي هذا العرض', d: 'عرض لفترة محدودة على خدمات المكياج', time: '03:10 م' },
+    { g: '12 مايو 2025', type: 'star', t: 'شكراً لتقييمك', d: 'رأيك يهمنا ويساعدنا على التحسين', time: '11:30 ص' },
+    { g: '12 مايو 2025', type: 'cal', t: 'تم إلغاء موعدك', d: 'تم إلغاء الموعد رقم #1245 بناءً على طلبك', time: '10:00 ص' }
+  ];
+
+  // Category tiles in the order shown in the design (right to left)
+  const CATS = [
+    { n: 'الصالون', i: 'scissors', h: 330 },
+    { n: 'مراكز التجميل', i: 'brush', h: 280 },
+    { n: 'الصحة', i: 'pulse', h: 160 },
+    { n: 'الأسنان', i: 'tooth', h: 200 },
+    { n: 'اللياقة البدنية', i: 'dumbbell', h: 140, jump: 'sec-fit' }
+  ];
+
+  // ---------- State ----------
+  const S = {
+    user: false, route: 'home', cart: {}, fav: new Set(['s1', 'p2', 'sa1']),
+    favTab: 'all', bookTab: 'upcoming', coupTab: 'all', notifTab: 'all', interest: 'all', storeCat: 'all',
+    q: '', slide: 0, pay: 'c1', confirmCancel: null, prefs: { push: true, sms: false, email: true, offers: true, reminders: true, reviews: true, fav: true },
+    bookings: BOOKINGS.map(b => ({ ...b })), notifs: NOTIFS.map(n => ({ ...n }))
+  };
+
+  // ---------- Helpers ----------
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const price = n => `<span class="price">${n.toLocaleString('en-US')} <small>IQD</small></span>`;
+  const oldP = n => n ? `<span class="old">${n.toLocaleString('en-US')}</span>` : '';
+  const P = {
+    heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+    back: '<path d="M9 5l7 7-7 7"/>',
+    chev: '<path d="M15 6l-6 6 6 6"/>',
+    cal: '<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>',
+    search: '<path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5"/>',
+    user: '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1-4 4-6 8-6s7 2 8 6"/>',
+    gift: '<path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-2-3-5-3-5-1s5 1 5 1zM12 7c2-3 5-3 5-1s-5 1-5 1z"/>',
+    headset: '<path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H4zM17 14h3v5h-3z"/>',
+    pin: '<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>',
+    gear: '<path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/>',
+    card: '<path d="M3 6h18v12H3zM3 10h18"/>',
+    wallet: '<path d="M3 7h16v12H3zM15 13h4"/>',
+    tag: '<path d="M3 12V4h8l10 10-8 8zM7 8h.01"/>',
+    truck: '<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/>',
+    lock: '<path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"/>',
+    logout: '<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/>',
+    spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+    cart: '<path d="M3 4h2l2.4 11h10.2L20 7H7M9 19h.01M17 19h.01"/>',
+    pen: '<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    info: '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5h.01"/>',
+    check: '<path d="M5 12l5 5 9-10"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+    sparkle: '<path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8z"/>',
+    scissors: '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5L20 18M8 16.5L20 6"/>',
+    brush: '<path d="M14 4l6 6-8 8H6v-6zM4 20h6"/>',
+    pulse: '<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+    tooth: '<path d="M7 4c-2 0-3 2-3 4 0 3 1 6 2 8 .6 1.5 2 1.5 2.5 0 .5-1.5 1-2 1.5-2s1 .5 1.5 2c.5 1.5 1.9 1.5 2.5 0 1-2 2-5 2-8 0-2-1-4-3-4-1.5 0-2 1-4 1S8.5 4 7 4z"/>',
+    dumbbell: '<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>'
+  };
+  const ic = (k, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[k]}</svg>`;
+  const ph = (hue, icon = 'sparkle', cls = '') => `<div class="ph ${cls}" style="--h:${hue}">${ic(icon)}</div>`;
+  const kindOf = id => id[0] === 's' && id[1] !== 'a' ? 'service' : id.startsWith('sa') ? 'salon' : 'product';
+  const findItem = id => SERVICES.find(x => x.id === id) || PRODUCTS.find(x => x.id === id) || SALONS.find(x => x.id === id);
+  const cartCount = () => Object.values(S.cart).reduce((a, b) => a + b, 0);
+  const unreadCount = () => S.notifs.filter(n => n.unread).length;
+  const favBtn = id => `<button class="fav ${S.fav.has(id) ? 'on' : ''}" data-fav="${id}" aria-label="إضافة إلى المفضلة" aria-pressed="${S.fav.has(id)}">${ic('heart')}</button>`;
+  const sectionHead = (title, sub, go) => `
+    <div class="section-head"><div><h2>${title}</h2>${sub ? `<p>${sub}</p>` : ''}</div>
+    ${go ? `<button class="link" data-go="${go}">عرض الكل ${ic('chev', 'sm')}</button>` : ''}</div>`;
+
+  // ---------- Card builders ----------
+  const serviceCard = (s, wide = false) => `
+    <article class="card item w ${wide ? 'wide' : ''}" data-open="service" data-id="${s.id}" style="cursor:pointer">
+      <div style="position:relative">${ph(s.hue, 'sparkle')}${s.disc ? `<span class="badge">-${s.disc}%</span>` : ''}${favBtn(s.id)}</div>
+      <div class="body">
+        <span class="cat">${esc(s.cat)}</span>
+        <h3>${esc(s.name)}</h3>
+        <div class="meta">${ic('star')} ${s.rating} · ${esc(s.center)}</div>
+        <div class="row-between">${price(s.price)}<button class="btn sm" data-book="${s.id}">احجزي</button></div>
+      </div>
+    </article>`;
+  const productCard = p => `
+    <article class="card item" data-open="product" data-id="${p.id}" style="cursor:pointer">
+      <div style="position:relative">${ph(p.hue, 'sparkle', 'sq')}${p.disc ? `<span class="badge">خصم %${p.disc}</span>` : ''}${favBtn(p.id)}</div>
+      <div class="body">
+        <span class="cat">${esc(p.brand)}</span>
+        <h3>${esc(p.name)}</h3>
+        <div class="meta">${ic('star')} ${p.rating} (${p.n})</div>
+        <div class="row-between">
+          <div>${price(p.price)} ${oldP(p.old)}</div>
+          <button class="icon-btn" style="width:38px;height:38px;background:var(--primary);color:#fff;border:0" data-add="${p.id}" aria-label="أضف إلى السلة">${ic('cart', 'sm')}</button>
+        </div>
+      </div>
+    </article>`;
+  const salonCard = s => `
+    <article class="card salon" data-open="salon" data-id="${s.id}" style="cursor:pointer">
+      <div style="position:relative">${ph(s.hue, 'pin')}${s.featured ? '<span class="featured">مميز</span>' : ''}${favBtn(s.id)}</div>
+      <div class="body">
+        <h3>${esc(s.name)}</h3>
+        <div class="meta" style="display:flex;gap:4px;align-items:center;color:var(--muted);font-size:12px">${ic('star', 'sm')} ${s.rating} (${s.n}) · ${esc(s.area)}</div>
+        <div class="tags">${s.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
+        <div class="dist">${ic('pin', 'sm')} ${s.dist}</div>
+      </div>
+    </article>`;
+  const favRow = id => {
+    const it = findItem(id); if (!it) return '';
+    const k = kindOf(id);
+    const sub = k === 'product' ? it.brand : k === 'salon' ? it.area : it.center;
+    return `
+      <div class="card" style="display:flex;gap:12px;align-items:center;padding:12px">
+        <div style="width:76px;flex:none">${ph(it.hue, k === 'salon' ? 'pin' : 'sparkle', 'rounded')}</div>
+        <div style="flex:1;min-width:0">
+          <h3>${esc(it.name)}</h3>
+          <div class="muted small">${esc(sub)}</div>
+          <div style="margin-top:6px">${k === 'salon' ? `<span class="tag">${it.rating} ★</span>` : price(it.price)}</div>
+        </div>
+        <button class="fav on" style="position:static" data-fav="${id}" aria-label="إزالة من المفضلة">${ic('heart')}</button>
+      </div>`;
+  };
+  const gate = (title) => `
+    <section class="card empty" style="margin-top:24px">
+      ${ic('lock')}
+      <h2 style="color:var(--fg)">سجلي دخولك لعرض ${title}</h2>
+      <p style="margin:6px 0 16px">سجلي دخولك للاستمتاع بتجربة جمال متكاملة ومخصصة لك</p>
+      <button class="btn" data-act="auth">تسجيل الدخول</button>
+    </section>`;
+  const sampleNote = `<p class="sample">بيانات تجريبية للعرض</p>`;
+
+  // ---------- Views ----------
+  const V = {};
+
+  V.home = () => {
+    const slides = [
+      { cls: '', t: 'جمالك يستحق الأفضل', p: 'اكتشفي أحدث خدمات العناية والتجميل من أفضل المراكز القريبة', btn: 'احجزي الآن', go: 'search' },
+      { cls: 's2', t: 'خصم يصل إلى 40%', p: 'على مختارات العناية بالبشرة من المتجر', btn: 'تسوقي الآن', go: 'store' },
+      { cls: 's3', t: 'احجزي موعدك بسهولة', p: 'اختاري الموظفة والتاريخ والوقت وتأكدي في ثوانٍ', btn: 'ابدئي الحجز', go: 'search' }
+    ];
+    return `
+    <section class="greet">
+      <div class="avatar">${S.user ? 'س' : 'ض'}</div>
+      <div>
+        <h1>${S.user ? 'مرحباً سارة' : 'مرحباً بكِ'}</h1>
+        <div class="loc">${ic('pin')} بغداد، الكرادة</div>
+      </div>
+    </section>
+
+    <section class="hero" aria-label="بنر">
+      ${slides.map((s, i) => `
+        <div class="slide ${s.cls} ${i === S.slide ? 'on' : ''}" data-slide="${i}">
+          <h2>${s.t}</h2><p>${s.p}</p>
+          <button class="btn" data-go="${s.go}">${s.btn}</button>
+        </div>`).join('')}
+    </section>
+    <div class="dots" role="tablist">${slides.map((_, i) => `<button data-dot="${i}" aria-current="${i === S.slide}" aria-label="شريحة ${i + 1}"></button>`).join('')}</div>
+
+
+    <section class="section" id="sec-cats">
+      <div class="section-head"><div><h2 class="big-h">أقسام الخدمات</h2><p>الصالون • مراكز التجميل • الصحة • الأسنان • اللياقة البدنية</p></div><button class="link" data-go="search">عرض الكل ${ic('chev', 'sm')}</button></div>
+      <div class="cat-grid">
+        ${CATS.map(c => `<button class="cat-card" ${c.jump ? `data-jump="${c.jump}"` : `data-act="toast" data-msg="${c.n}"`}><span class="cat-ico" style="background:hsl(${c.h} 70% 95%);color:hsl(${c.h} 50% 42%)">${ic(c.i)}</span><span class="cat-name">${c.n}</span></button>`).join('')}
+      </div>
+    </section>
+
+    <section class="promos section">
+      <button class="promo p1" data-act="toast" data-msg="كوبوناتك متاحة في نقاطي وكوبوناتي"><h3>كوبونات خصم</h3><p>خصم إضافي على المنتجات المختارة</p><span class="btn">استفيدي من العروض</span></button>
+      <button class="promo p2" data-go="points"><h3>برنامج الولاء</h3><p>اجمعي النقاط واستبدليها بمكافآت</p><span class="btn">اعرفي المزيد</span></button>
+      <button class="promo p3" data-go="payment"><h3>الدفع الإلكتروني</h3><p>ادفعي بسهولة وأمان تام</p><span class="btn">ادفعي الآن</span></button>
+    </section>
+
+
+    <section class="section" id="sec-offers">
+      ${sectionHead('عروض حصرية لك', 'خصومات على جلسات ومنتجات مختارة', 'search')}
+      <div class="row">${SERVICES.filter(s => s.disc).map(s => serviceCard(s, true)).join('')}</div>
+    </section>
+
+    <section class="section">
+      ${sectionHead('صالونات مميزة', 'مراكز موثوقة بتقييمات عالية')}
+      <div class="row">${SALONS.map(salonCard).join('')}</div>
+    </section>
+
+    <section class="section" id="sec-near">
+      ${sectionHead('أقرب الصالونات إليك', 'صالونات وعيادات ومراكز عناية', 'search')}
+      <div class="row">${SALONS.slice().reverse().map(salonCard).join('')}</div>
+    </section>
+
+    <section class="section" id="sec-fit">
+      ${sectionHead('خدمات اللياقة البدنية', 'صالات ومدربون وبرامج متكاملة', 'search')}
+      <div class="row">${SERVICES.filter(s => s.cat === 'اللياقة').map(s => serviceCard(s, true)).join('')}</div>
+    </section>
+
+    <section class="section">
+      ${sectionHead('حسب اهتماماتك', 'حسب اهتمامك، وليس حسب نوع المركز فقط')}
+      <div class="chips" role="group" aria-label="فلترة">
+        ${['all:الكل', 'البشرة:البشرة', 'الشعر:الشعر', 'المكياج:المكياج', 'الأظافر:الأظافر', 'اللياقة:اللياقة'].map(x => { const [k, l] = x.split(':'); return `<button class="chip" data-interest="${k}" aria-pressed="${S.interest === k}">${l}</button>`; }).join('')}
+      </div>
+      <div class="grid" style="margin-top:12px">
+        ${SERVICES.filter(s => S.interest === 'all' || s.cat === S.interest).map(s => `<div>${serviceCard(s)}</div>`).join('')}
+      </div>
+    </section>
+
+    <section class="section">
+      ${sectionHead('منتجات نرشحها لك', 'منتجات عناية وجمال مختارة لكِ من المتجر', 'store')}
+      <div class="grid">${PRODUCTS.slice(0, 4).map(productCard).join('')}</div>
+    </section>
+
+    <section class="section">
+      ${sectionHead('نصائح ومقالات', '')}
+      <div class="grid">
+        ${[['روتين العناية بالبشرة للبشرة الحساسة', 'pen', 300], ['أحدث صيحات تسريحات الشعر', 'spark', 260], ['كيف تختارين الماكياج المناسب للصيف', 'sparkle', 15]].map(([t, i, h]) =>
+          `<article class="card item" style="cursor:pointer" data-act="toast" data-msg="المقالات قيد التحميل في هذه النسخة التجريبية">${ph(h, i)}<div class="body"><h3>${t}</h3><div class="muted small">دقائق للقراءة: 4</div></div></article>`).join('')}
+      </div>
+    </section>
+
+    <section class="section trust">
+      <div>${ic('shield')}جودة مضمونة</div>
+      <div>${ic('card')}دفع آمن</div>
+      <div>${ic('headset')}دعم 24/7</div>
+      <div>${ic('truck')}استرجاع سهل</div>
+    </section>
+    ${sampleNote}`;
+  };
+
+  V.store = () => {
+    const cats = ['all:الكل', 'البشرة:البشرة', 'المكياج:المكياج', 'الشعر:الشعر', 'الأظافر:الأظافر', 'العطور:العطور'];
+    const list = PRODUCTS.filter(p => S.storeCat === 'all' || p.cat === S.storeCat);
+    return `
+    <div class="page-title"><div><span class="sample" style="letter-spacing:.12em">WAQTK STORE</span><h1>متجر Waqtk</h1><p>منتجات أصلية • توصيل موثوق</p></div>
+      <button class="icon-btn" data-go="cart" aria-label="السلة"><svg class="i" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H7M9 19h.01M17 19h.01"/></svg><span class="dot" data-cartcount></span></button></div>
+    <div class="search"><input placeholder="ابحثي عن منتج أو ماركة..." aria-label="بحث في المتجر" id="storeSearch"></div>
+    <section class="hero section" style="min-height:170px">
+      <div class="slide s2 on" style="position:relative;opacity:1;min-height:170px">
+        <span class="tag" style="background:#fff;color:var(--primary);align-self:flex-start">مجموعة محدودة</span>
+        <h2>خصم يصل إلى 40%</h2><p>على مختارات العناية بالبشرة</p>
+        <button class="btn" data-act="toast" data-msg="العرض مطبّق على المنتجات المختارة">تسوقي الآن</button>
+      </div>
+    </section>
+    <section class="section trust" style="grid-template-columns:repeat(3,1fr)">
+      <div>${ic('truck')}توصيل سريع</div><div>${ic('check')}منتجات أصلية</div><div>${ic('spark')}استرجاع سهل</div>
+    </section>
+    <section class="section"><div class="chips">${cats.map(x => { const [k, l] = x.split(':'); return `<button class="chip" data-storecat="${k}" aria-pressed="${S.storeCat === k}">${l}</button>`; }).join('')}</div></section>
+    <section class="section">${sectionHead('منتجات مختارة لك', '')}
+      <div class="grid">${list.map(productCard).join('')}</div>
+    </section>
+    <section class="section">${sectionHead('ماركات مميزة', 'علامات تجميل موثوقة')}
+      <div class="row">${['Nuxe', "L'Oréal", 'The Ordinary', 'CeraVe'].map(b => `<div class="card" style="width:130px;height:72px;display:grid;place-items:center;font-weight:700;color:var(--muted)">${b}</div>`).join('')}</div>
+    </section>
+    <section class="card" style="margin-top:24px;padding:14px;display:flex;gap:10px;align-items:center;font-weight:600">${ic('truck')} توصيل مجاني فوق 50,000 IQD<span class="muted small" style="font-weight:400"> · الدفع عند الاستلام متاح في معظم المناطق</span></section>`;
+  };
+
+  V.favorites = () => {
+    if (!S.user) return gate('المفضلة');
+    const ids = [...S.fav];
+    const filt = S.favTab === 'all' ? ids : ids.filter(id => (S.favTab === 'services' && kindOf(id) === 'service') || (S.favTab === 'products' && kindOf(id) === 'product') || (S.favTab === 'centers' && kindOf(id) === 'salon'));
+    return `
+    <div class="page-title"><h1>المفضلة</h1><span class="muted small">${ids.length} عنصر محفوظ</span></div>
+    <div class="tabs" role="tablist">
+      ${[['all', 'الكل'], ['services', 'الخدمات'], ['products', 'المنتجات'], ['centers', 'مراكز التجميل']].map(([k, l]) => `<button role="tab" aria-selected="${S.favTab === k}" data-favtab="${k}">${l}</button>`).join('')}
+    </div>
+    <section class="stack" style="margin-top:14px">
+      ${filt.length ? filt.map(favRow).join('') : `<div class="card empty">${ic('heart')}<p>لا توجد عناصر في هذا القسم</p><button class="btn sm" data-go="home">استكشفي الآن</button></div>`}
+    </section>
+    <section class="card" style="margin-top:18px;padding:16px;background:linear-gradient(120deg,#FCE4EC,#F8BBD0);border:0;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <div><h3 style="color:var(--primary-dark)">عرض خاص لأجلك</h3><p class="small" style="margin:2px 0 0;color:var(--primary-dark)">احصلي على خصومات حصرية على خدماتك المفضلة</p></div>
+      <button class="btn sm" data-go="points">عرض العروض</button>
+    </section>`;
+  };
+
+  V.bookings = () => {
+    if (!S.user) return gate('حجوزاتك');
+    const list = S.bookings.filter(b => b.state === S.bookTab);
+    const counts = { upcoming: 0, past: 0, cancelled: 0 };
+    S.bookings.forEach(b => counts[b.state]++);
+    const card = b => `
+      <article class="card bk">
+        <div class="bk-top">
+          ${ph(b.hue, 'sparkle', 'rounded')}
+          <div class="bk-info">
+            <span class="ref">رقم التذكرة ${b.id}#</span>
+            <h3>${esc(b.svc)}</h3>
+            <div class="muted small">${esc(b.center)}</div>
+            <div class="bk-meta"><span>${b.date}</span><span>${b.time}</span><span>${b.dur} دقيقة</span></div>
+          </div>
+          <div style="text-align:end;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            <span class="status ${b.status}">${b.label}</span>
+            ${price(b.price)}
+          </div>
+        </div>
+        ${b.state === 'upcoming' ? `
+          <div class="bk-actions">
+            <button class="btn wide" data-act="toast" data-msg="تفاصيل الحجز ${b.id}">تفاصيل الحجز</button>
+            ${S.confirmCancel === b.id
+              ? `<button class="btn danger" data-cancel="${b.id}">تأكيد الإلغاء</button><button class="btn ghost" data-confirm-no>تراجع</button>`
+              : `<button class="btn ghost" data-cancel-ask="${b.id}">إلغاء الحجز</button><button class="btn ghost" data-act="toast" data-msg="تعديل الموعد متاح من تفاصيل الحجز">تعديل الموعد</button>`}
+          </div>` : ''}
+        ${b.state === 'past' ? `<div class="bk-actions"><button class="btn ghost wide" data-act="toast" data-msg="شكراً لتقييمك!">تقييم الخدمة</button></div>` : ''}
+      </article>`;
+    return `
+    <div class="page-title"><h1>حجوزاتي</h1><button class="icon-btn" data-go="search" aria-label="حجز جديد">${ic('cal')}</button></div>
+    <div class="tabs" role="tablist">
+      ${[['upcoming', 'القادمة'], ['past', 'السابقة'], ['cancelled', 'ملغاة']].map(([k, l]) => `<button role="tab" aria-selected="${S.bookTab === k}" data-booktab="${k}">${l}${counts[k] ? ` <span class="count">${counts[k]}</span>` : ''}</button>`).join('')}
+    </div>
+    <section class="stack" style="margin-top:14px">
+      ${list.length ? list.map(card).join('') : `<div class="card empty">${ic('cal')}<p>لا توجد حجوزات في هذا القسم</p></div>`}
+    </section>
+    <section class="note" style="margin-top:18px">${ic('headset')}<div><b>تحتاج مساعدة؟</b><br><span class="small">فريق الدعم الفني متاح لمساعدتك في أي وقت</span></div><button class="btn sm" style="margin-inline-start:auto" data-act="toast" data-msg="جارٍ توصيلك بالدعم الفني">تواصل معنا</button></section>
+    ${sampleNote}`;
+  };
+
+  V.search = () => `
+    <div class="page-title"><h1>البحث</h1></div>
+    <div class="search"><span>${ic('search')}</span><input id="q" type="search" placeholder="ابحثي عن خدمة أو صالون..." value="${esc(S.q)}" aria-label="بحث"></div>
+    <div class="chips" style="margin-top:12px">
+      ${['all:الكل', 'service:الخدمات', 'salon:الصالونات'].map(x => { const [k, l] = x.split(':'); return `<button class="chip" data-sfilter="${k}" aria-pressed="${(S.sfilter || 'all') === k}">${l}</button>`; }).join('')}
+    </div>
+    <div id="results" style="margin-top:14px">${resultsHTML()}</div>
+    <section class="note" style="margin-top:18px">${ic('headset')}<div><b>تحتاج مساعدة؟</b><br><span class="small">تواصلي مع فريق الدعم لإيجاد الخدمة المناسبة</span></div></section>`;
+  const resultsHTML = () => {
+    const q = S.q.trim().toLowerCase(); const f = S.sfilter || 'all';
+    const sv = SERVICES.filter(s => (f === 'all' || f === 'service') && (!q || (s.name + s.center + s.cat).toLowerCase().includes(q)));
+    const sa = SALONS.filter(s => (f === 'all' || f === 'salon') && (!q || (s.name + s.area + s.tags.join(' ')).toLowerCase().includes(q)));
+    if (!sv.length && !sa.length) return `<div class="card empty">${ic('search')}<p>لا توجد نتائج مطابقة</p></div>`;
+    return `<div class="stack">
+      ${sv.map(s => `<div class="card" style="display:flex;gap:12px;align-items:center;padding:12px">
+        <div style="width:82px;flex:none;position:relative">${ph(s.hue, 'sparkle', 'rounded')}${s.disc ? `<span class="badge" style="top:4px;inset-inline-start:4px;font-size:10px">-${s.disc}%</span>` : ''}</div>
+        <div style="flex:1;min-width:0"><h3>${esc(s.name)}</h3><div class="muted small">${esc(s.center)} · ${s.dur} دقيقة</div>
+          <div class="meta" style="display:flex;gap:4px;align-items:center;font-size:12px;color:var(--muted);margin-top:2px">${ic('star', 'sm')} ${s.rating}</div>
+          <div class="row-between" style="margin-top:6px">${price(s.price)} ${oldP(s.old)}</div></div>
+        <button class="fav ${S.fav.has(s.id) ? 'on' : ''}" data-fav="${s.id}" style="position:static" aria-label="مفضلة">${ic('heart')}</button>
+      </div>`).join('')}
+      ${sa.map(s => `<div class="card" style="display:flex;gap:12px;align-items:center;padding:12px">
+        <div style="width:82px;flex:none">${ph(s.hue, 'pin', 'rounded')}</div>
+        <div style="flex:1;min-width:0"><h3>${esc(s.name)}</h3><div class="muted small">${esc(s.area)} · ${s.dist}</div>
+          <div class="muted small">${ic('star', 'sm')} ${s.rating} (${s.n})</div></div>
+        <button class="fav ${S.fav.has(s.id) ? 'on' : ''}" data-fav="${s.id}" style="position:static" aria-label="مفضلة">${ic('heart')}</button>
+      </div>`).join('')}
+    </div>`;
+  };
+
+  V.profile = () => {
+    if (!S.user) return gate('ملفك الشخصي');
+    const menu = (ico, label, action, danger) => `<button class="list-row ${danger ? 'danger' : ''}" data-go="${action.go || ''}" ${action.msg ? `data-act="toast" data-msg="${action.msg}"` : ''} ${action.logout ? 'data-act="logout"' : ''}><span class="ico">${ic(ico, 'sm')}</span><span class="txt">${label}</span><span class="chev">${ic('chev', 'sm')}</span></button>`;
+    return `
+    <div class="page-title"><h1>الملف الشخصي</h1><button class="icon-btn" data-go="account" aria-label="الإعدادات">${ic('gear')}</button></div>
+    <section class="card" style="padding:16px;display:flex;gap:14px;align-items:center">
+      <div class="avatar" style="width:60px;height:60px">س</div>
+      <div style="flex:1;min-width:0"><h2>سارة أحمد الجبوري</h2><div class="muted small">sara.aljubouri@email.com</div></div>
+      <span class="tag">المستوى الفضي</span>
+    </section>
+    <section class="section"><div class="tiles">
+      <div>${ic('heart')}<b>${S.fav.size}</b>المفضلة</div>
+      <div>${ic('cal')}<b>${S.bookings.length}</b>حجوزاتي</div>
+      <div>${ic('gift')}<b>3</b>قيد الانتظار</div>
+      <div>${ic('wallet')}<b>4</b>محفظتي</div>
+      <div>${ic('star')}<b>320</b>النقاط</div>
+    </div></section>
+    <section class="card section" style="padding:16px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <div><div class="small muted">لديك 320 نقطة</div><div class="small">رصيد المحفظة <span class="price">175.00 <small>IQD</small></span></div></div>
+      <div style="display:flex;gap:8px"><button class="btn sm ghost" data-act="toast" data-msg="شحن المحفظة متاح قريباً">شحن المحفظة</button><button class="btn sm" data-go="points">النقاط</button></div>
+    </section>
+    <section class="section"><h2 style="margin-bottom:10px">طلباتي</h2>
+      <div class="orders4">
+        <button data-go="bookings">${ic('truck')}المقبلة</button>
+        <button data-go="bookings">${ic('spark')}قيد الانتظار</button>
+        <button data-go="bookings">${ic('check')}مكتملة</button>
+        <button data-go="bookings">${ic('info')}الملغاة</button>
+      </div></section>
+    <section class="section"><h2 style="margin-bottom:10px">إدارة الحساب</h2>
+      <div class="list">
+        ${menu('user', 'معلومات الحساب', { go: 'account' })}
+        ${menu('cart', 'طلباتي', { go: 'orders' })}
+      ${menu('pin', 'عناويني المحفوظة', { go: 'addresses' })}
+        ${menu('card', 'طرق الدفع', { go: 'payment' })}
+        ${menu('tag', 'نقاطي وكوبوناتي', { go: 'points' })}
+        ${menu('wallet', 'المحفظة', { msg: 'المحفظة متاحة قريباً' })}
+        ${menu('gear', 'تفضيلاتي', { go: 'account' })}
+        ${menu('bell', 'الإشعارات', { go: 'notifications' })}
+        ${menu('shield', 'الخصوصية والأمان', { msg: 'إعدادات الأمان تُدار من التطبيق' })}
+        ${menu('headset', 'مركز المساعدة', { go: 'help' })}
+        <button class="list-row danger" data-act="logout"><span class="ico">${ic('logout', 'sm')}</span><span class="txt">تسجيل الخروج</span></button>
+      </div>
+    </section>
+    <p class="sample" style="text-align:center;margin-top:18px">تطبيق Waqtk · إصدار 1.4.0 (نسخة ويب تجريبية)</p>`;
+  };
+
+  V.account = () => {
+    if (!S.user) return gate('معلومات الحساب');
+    const p = S.prefs;
+    const sw = (k, label) => `<div class="switch-row"><span>${label}</span><button class="switch" role="switch" aria-checked="${p[k]}" data-pref="${k}" aria-label="${label}"></button></div>`;
+    return `
+    <div class="page-h"><button class="back" data-go="profile">${ic('back', 'sm')} الملف الشخصي</button><h1>معلومات الحساب</h1></div>
+    <section class="card" style="overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line)"><h2>البيانات الشخصية</h2></div>
+      <form class="form" id="acct">
+        <div class="field"><label for="f-name">الاسم الكامل</label><input id="f-name" value="سارة أحمد الجبوري"></div>
+        <div class="field"><label for="f-email">البريد الإلكتروني</label><input id="f-email" type="email" value="sara.aljubouri@email.com"></div>
+        <div class="field"><label for="f-phone">رقم الجوال</label><input id="f-phone" type="tel" value="+964 770 123 4567"></div>
+        <div class="field"><label for="f-dob">تاريخ الميلاد</label><input id="f-dob" type="date" value="1995-05-25"></div>
+        <div class="field"><label for="f-gender">الجنس</label><select id="f-gender"><option>أنثى</option><option>ذكر</option></select></div>
+        <div class="full" style="border-top:1px solid var(--line);padding-top:14px"><h2>العنوان</h2></div>
+        <div class="field"><label for="f-city">المدينة</label><input id="f-city" value="بغداد"></div>
+        <div class="field"><label for="f-dist">الحي</label><input id="f-dist" value="الكرادة"></div>
+        <div class="field"><label for="f-street">الشارع</label><input id="f-street" value="شارع أبو نؤاس"></div>
+        <div class="field"><label for="f-house">رقم المنزل</label><input id="f-house" value="1234"></div>
+        <div class="field full"><label for="f-zip">الرمز البريدي</label><input id="f-zip" value="10001"></div>
+      </form>
+    </section>
+    <section class="card section" style="overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line)"><h2>تفضيلات التواصل</h2></div>
+      ${sw('offers', 'تلقي العروض والباقات عبر الإشعارات')}
+      ${sw('sms', 'تلقي رسائل SMS')}
+      ${sw('email', 'تلقي رسائل البريد الإلكتروني')}
+      ${sw('reminders', 'تذكير بالمواعيد')}
+      ${sw('reviews', 'تقييم بعد الخدمة')}
+    </section>
+    <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn block" data-act="save">حفظ التغييرات</button>
+    </div>`;
+  };
+
+  V.payment = () => {
+    if (!S.user) return gate('طرق الدفع');
+    const cards = [
+      { id: 'c1', brand: 'MC', name: 'ماستركارد', num: '•••• 4242', exp: '12/26', def: true },
+      { id: 'c2', brand: 'VISA', name: 'فيزا', num: '•••• 1881', exp: '08/27' },
+      { id: 'c3', brand: 'QI', name: 'Qi Card', num: '•••• 9012', exp: '03/28' }
+    ];
+    const others = [
+      ['truck', 'الدفع عند الاستلام', 'ادفع نقداً عند استلام طلبك'],
+      ['wallet', 'ZainCash', 'ادفع عبر محفظة زين كاش'],
+      ['card', 'AsiaHawala / FastPay', 'ادفع عبر الحوالات الإلكترونية'],
+      ['gift', 'الدفع في الصالون', 'نقداً أو عبر جهاز الدفع في الصالون']
+    ];
+    return `
+    <div class="page-h"><button class="back" data-go="profile">${ic('back', 'sm')} الملف الشخصي</button><h1>طرق الدفع</h1></div>
+    <section class="card" style="overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line)"><h2>البطاقات المحفوظة</h2><p class="sample" style="margin:2px 0 0">بطاقات تجريبية للعرض</p></div>
+      ${cards.map(c => `<button class="pay-card" data-pay="${c.id}" aria-pressed="${S.pay === c.id}">
+        <span class="brand-chip">${c.brand}</span>
+        <span style="flex:1;min-width:0"><b>${c.name}</b>${c.def ? ' <span class="tag">افتراضي</span>' : ''}<br><span class="muted small">${c.num} · ينتهي ${c.exp}</span></span>
+        <span class="radio ${S.pay === c.id ? 'on' : ''}"></span></button>`).join('')}
+    </section>
+    <button class="btn ghost block section" data-act="toast" data-msg="إضافة البطاقات متاحة من التطبيق بأمان">+ إضافة بطاقة جديدة</button>
+    <section class="section"><h2 style="margin-bottom:10px">طرق دفع أخرى</h2>
+      <div class="list">${others.map(([i, t, d]) => `<button class="list-row" data-act="toast" data-msg="${t} متاح عند إتمام الطلب"><span class="ico">${ic(i, 'sm')}</span><span class="txt"><b>${t}</b><br><span class="muted small">${d}</span></span><span class="chev">${ic('chev', 'sm')}</span></button>`).join('')}</div>
+    </section>
+    <section class="secure section">${ic('lock')}<div><b>جميع عمليات الدفع مؤمنة 100%</b><br><span class="small muted">لا نحتفظ بأي معلومات لبطاقاتك الائتمانية</span></div></section>
+    <button class="btn block section" data-act="toast" data-msg="تم حفظ طريقة الدفع المختارة">متابعة</button>`;
+  };
+
+  V.points = () => {
+    if (!S.user) return gate('نقاطك وكوبوناتك');
+    const list = COUPONS.filter(c => S.coupTab === 'all' || (S.coupTab === 'available' ? c.st === 'available' : c.st === 'expired'));
+    return `
+    <div class="page-h"><button class="back" data-go="profile">${ic('back', 'sm')} الملف الشخصي</button><h1>نقاطي وكوبوناتي</h1></div>
+    <section class="card points-hero" style="border-radius:20px">
+      <div class="small" style="opacity:.9">إجمالي نقاطك</div>
+      <div class="big">2,450 <span style="font-size:14px;font-weight:600">نقطة</span></div>
+      <div class="small" style="opacity:.9">تنتهي 30 يونيو 2025</div>
+      <div class="stats3">
+        <div><b>350</b>تنتهي قريباً</div>
+        <div><b>1,250</b>قابلة للاستخدام</div>
+        <div><b>2,450</b>الإجمالي</div>
+      </div>
+    </section>
+    <section class="section"><h2 style="margin-bottom:10px">كوبوناتي</h2>
+      <div class="tabs" role="tablist">
+        ${[['all', 'الكل'], ['available', 'متاحة'], ['expired', 'منتهية']].map(([k, l]) => `<button role="tab" aria-selected="${S.coupTab === k}" data-coup="${k}">${l}</button>`).join('')}
+      </div>
+      <div class="stack" style="margin-top:14px">
+        ${list.map(c => `<div class="coupon ${c.cls}">
+          <div class="c-main"><span class="status ${c.st === 'available' ? 'ok' : 'mute'}" style="align-self:flex-start">${c.st === 'available' ? 'متاحة' : 'منتهية'}</span><h3>${c.title}</h3><span class="muted small">الحد الأدنى ${c.min} IQD · ${c.until}</span></div>
+          <div class="c-val">${c.val}${c.unit ? `<small>${c.unit}</small>` : '<small>خصم</small>'}</div>
+        </div>`).join('')}
+      </div>
+    </section>
+    <p class="muted small" style="margin-top:16px;display:flex;gap:6px;align-items:center">${ic('info', 'sm')} يمكنك استخدام النقاط والكوبونات عند إتمام الطلب من صفحة الدفع</p>`;
+  };
+
+  V.notifications = () => {
+    if (!S.user) return gate('الإشعارات');
+    const types = { all: 'الكل', order: 'الطلبات', offer: 'العروض', alert: 'التنبيهات' };
+    const list = S.notifs.filter(n => S.notifTab === 'all' || (S.notifTab === 'order' && n.type === 'order') || (S.notifTab === 'offer' && n.type === 'offer') || (S.notifTab === 'alert' && ['cal', 'star', 'wallet'].includes(n.type)));
+    const groups = [...new Set(list.map(n => n.g))];
+    const icon = t => ({ offer: 'gift', order: 'truck', star: 'star', cal: 'cal', wallet: 'wallet' }[t] || 'bell');
+    return `
+    <div class="page-title"><h1>الإشعارات</h1><button class="link" data-act="readall">تعليم الكل كمقروء</button></div>
+    <div class="tabs" role="tablist">
+      ${Object.entries(types).map(([k, l]) => `<button role="tab" aria-selected="${S.notifTab === k}" data-notif="${k}">${l}</button>`).join('')}
+    </div>
+    ${groups.map(g => `
+      <h3 class="muted small" style="margin:18px 0 8px">${g}</h3>
+      <div class="list">${list.filter(n => n.g === g).map(n => `
+        <div class="list-row" style="align-items:flex-start">
+          ${n.unread ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:8px;flex:none"></span>' : '<span style="width:8px;flex:none"></span>'}
+          <span class="ico">${ic(icon(n.type), 'sm')}</span>
+          <span class="txt"><b>${n.t}</b><br><span class="muted small">${n.d}</span></span>
+          <span class="muted small" style="white-space:nowrap">${n.time}</span>
+        </div>`).join('')}</div>`).join('')}
+    ${list.length ? '' : `<div class="card empty">${ic('bell')}<p>لا توجد إشعارات</p></div>`}
+    <section class="note" style="margin-top:18px">${ic('bell')}<div><b>تفعيل الإشعارات</b><br><span class="small">ابقي على اطلاع بكل جديد من Waqtk</span></div><button class="btn sm" style="margin-inline-start:auto" data-act="toast" data-msg="تم طلب تفعيل الإشعارات">تفعيل</button></section>`;
+  };
+
+  V.cart = () => {
+    const lines = Object.entries(S.cart).map(([id, q]) => ({ it: findItem(id), q })).filter(x => x.it);
+    const total = lines.reduce((a, x) => a + x.it.price * x.q, 0);
+    if (!lines.length) return `
+      <div class="page-h"><button class="back" data-go="store">${ic('back', 'sm')} المتجر</button><h1>السلة</h1></div>
+      <div class="card empty">${ic('cart')}<p>سلتك فارغة حالياً</p><button class="btn sm" data-go="store">تسوقي الآن</button></div>`;
+    return `
+    <div class="page-h"><button class="back" data-go="store">${ic('back', 'sm')} المتجر</button><h1>السلة</h1></div>
+    <div class="split">
+      <section class="card" style="overflow:hidden">
+        ${lines.map(({ it, q }) => `<div class="cart-line">
+          ${ph(it.hue, 'sparkle')}
+          <div style="min-width:0"><h3>${esc(it.name)}</h3><div class="muted small">${price(it.price)}</div></div>
+          <div class="qty"><button data-qty="${it.id}" data-d="1" aria-label="زيادة">+</button><span>${q}</span><button data-qty="${it.id}" data-d="-1" aria-label="إنقاص">−</button></div>
+        </div>`).join('')}
+      </section>
+      <aside class="card summary sticky">
+        <h2>ملخص الطلب</h2>
+        <div class="row-between"><span class="muted">المجموع</span>${price(total)}</div>
+        <div class="row-between"><span class="muted">التوصيل</span><span class="small">${total >= 50000 ? 'مجاني' : 'يحدد عند الدفع'}</span></div>
+        <div class="row-between" style="border-top:1px solid var(--line);padding-top:10px"><b>الإجمالي</b>${price(total)}</div>
+        <button class="btn block" data-act="checkout">متابعة الدفع</button>
+      </aside>
+    </div>`;
+  };
+
+  V.login = () => `
+    <section class="card auth">
+      <div class="brand-mark">B</div>
+      <h1>مرحباً بك مجدداً</h1>
+      <p class="muted" style="margin:6px 0 0">سجلي دخولك للاستمتاع بتجربة جمال متكاملة ومخصصة لك</p>
+      <form id="loginForm">
+        <div class="field"><label for="l-email">البريد الإلكتروني أو رقم الجوال</label><input id="l-email" type="text" placeholder="sara@email.com" autocomplete="username"></div>
+        <div class="field"><label for="l-pass">كلمة المرور</label><input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+        <button class="btn block" type="submit">تسجيل الدخول</button>
+      </form>
+      <div class="or">أو تسجيل الدخول باستخدام</div>
+      <button class="gbtn" data-act="login">Google</button>
+      <p class="small muted" style="margin-top:18px">ليس لديك حساب؟ <button class="link" data-act="login" style="display:inline">إنشاء حساب جديد</button></p>
+      <p class="sample" style="margin-top:14px">نسخة تجريبية: أي بيانات تُقبل للدخول</p>
+    </section>`;
+
+  // ---------- Extra data (sample) ----------
+  const STAFF = [
+    { id: 'st1', name: 'سارة الموسوي', role: 'أخصائية بشرة', rating: 4.9, hue: 330 },
+    { id: 'st2', name: 'نور الهدى', role: 'مصففة شعر', rating: 4.7, hue: 280 },
+    { id: 'st3', name: 'ليلى حسن', role: 'خبيرة مكياج', rating: 4.8, hue: 20 },
+    { id: 'st4', name: 'رنا كاظم', role: 'فنية أظافر', rating: 4.6, hue: 350 }
+  ];
+  const ADDRESSES = [
+    { id: 'a1', name: 'المنزل', line: 'الكرادة، شارع 62، بناية 14، الطابق 2', phone: '07701234567' },
+    { id: 'a2', name: 'العمل', line: 'المنصور، شارع 14، مجمع الفلاح، الطابق 5', phone: '07809876543' }
+  ];
+  const ORDERS = [
+    { id: '#1256', date: '6 نوفمبر 2026', items: ['كريم ترطيب Hyaluronic', 'قناع ترطيب يومي'], total: 140, state: 'جاري التوصيل', st: 'wait', hue: 260, addr: 'الكرادة، شارع 62، بناية 14' },
+    { id: '#1231', date: '18 أكتوبر 2026', items: ['عطر زهري فاخر'], total: 149, state: 'تم التسليم', st: 'ok', hue: 340, addr: 'الكرادة، شارع 62، بناية 14' }
+  ];
+  const REVIEWS = [
+    { n: 'زينب ع.', r: 5, t: 'خدمة ممتازة والموظفة محترفة جداً، النتيجة فاقت توقعاتي.', d: 'قبل يومين' },
+    { n: 'منى ك.', r: 4, t: 'المكان نظيف والمواعيد دقيقة. أنصح بالحجز المسبق.', d: 'قبل أسبوع' },
+    { n: 'هدى م.', r: 5, t: 'أفضل تنظيف بشرة جربته، سأعود بالتأكيد.', d: 'قبل شهر' }
+  ];
+  const FAQ = [
+    ['كيف أحجز موعداً؟', 'اختاري الخدمة ثم الموظفة والموعد المناسب، ثم أكدي الحجز من صفحة الملخص.'],
+    ['هل يمكن إلغاء الحجز أو تغييره؟', 'يمكن ذلك من صفحة تفاصيل الحجز قبل موعده بساعتين على الأقل.'],
+    ['ما طرق الدفع المتاحة؟', 'الدفع عند الحضور، أو بالبطاقة الإلكترونية، أو من المحفظة.'],
+    ['كيف أستخدم كوبون الخصم؟', 'أدخلي رمز الكوبون في صفحة الدفع ثم اضغطي تطبيق.']
+  ];
+  const ARTICLES = [
+    { id: 'ar1', t: 'روتين العناية بالبشرة اليومي', hue: 330, cat: 'العناية', body: ['ابدئي صباحاً بغسل لطيف يناسب نوع بشرتك، ثم سيروم مضاد للأكسدة وواقي شمس بعامل حماية 30 على الأقل.', 'في المساء، نظفي البشرة جيداً وأضيفي كريم ترطيب يعزز حاجز البشرة أثناء الليل.', 'الاستمرارية أهم من المنتجات المكلفة؛ الروتين البسيط المنتظم يعطي نتائج أفضل.'] },
+    { id: 'ar2', t: 'كيف تختارين لون الصبغة المناسب', hue: 280, cat: 'الشعر', body: ['ابدئي بتحديد لون بشرتك ودرجة لون عينيك، فهذا يحدد الدرجات الأقرب لإطلالتك.', 'الانتقال بين درجات متقاربة أسهل وأقل ضرراً من القفزات الكبيرة في اللون.', 'استشيري مختصة الشعر قبل الصبغة، خاصة إذا كان الشعر مصبوغاً أو معالجاً سابقاً.'] },
+    { id: 'ar3', t: 'تمارين بسيطة لمرونة أفضل', hue: 140, cat: 'اللياقة', body: ['خصصي عشر دقائق يومياً لتمارين الإطالة للعضلات الكبيرة، وحافظي على تنفس منتظم أثناءها.', 'أضيفي المشي السريع ثلاث مرات أسبوعياً لتحسين الدورة الدموية والطاقة.', 'تدرجي في الشدة، واستشيري مدرباً معتمداً إذا كانت لديك إصابة سابقة.'] }
+  ];
+  const ADDR_ICON = 'pin';
+  const SVC_CATS = ['الكل', 'البشرة', 'الشعر', 'الأظافر', 'الأسنان', 'الصحة', 'المكياج', 'اللياقة'];
+
+  // Lazy state for the new screens
+  const ensure = () => {
+    if (!S.bk) S.bk = { svc: 's1', staff: 'any', day: 0, dayLabel: '', time: null, addr: 'a1', phone: '', note: '', pay: 'cash', terms: false, step: 1 };
+    if (!S.addrs) S.addrs = ADDRESSES.map(a => ({ ...a }));
+    if (!S.orders) S.orders = ORDERS.map(o => ({ ...o }));
+    if (!S.rs) S.rs = { day: 0, dayLabel: '', time: null };
+    if (!S.chat) S.chat = [{ me: false, t: 'مرحباً بكِ! كيف يمكننا مساعدتك بخصوص حجزك؟', at: '09:00 ص' }];
+    if (!S.support) S.support = [{ me: false, t: 'أهلاً بكِ في الدعم. اكتبي استفسارك وسيرد عليك فريقنا.', at: '09:00 ص' }];
+    if (!S.ck) S.ck = { addr: 'a1', del: 'std', pay: 'cash', coupon: '', disc: 0, note: '', terms: false };
+    if (!S.salTab) S.salTab = 'svc';
+    if (!S.svcCat) S.svcCat = 'الكل';
+    if (!S.rated) S.rated = {};
+    if (!S.addOpen) S.addOpen = false;
+    if (!S.addDraft) S.addDraft = { name: '', line: '', phone: '' };
+  };
+  const stars = (n, on = false) => `<span class="mini-stars" aria-label="${n} من 5">${'★'.repeat(Math.round(n))}${'☆'.repeat(5 - Math.round(n))}</span>`;
+  const sttTag = (st, label) => `<span class="stt ${st}">${esc(label)}</span>`;
+  const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  const dayLabelOf = d => `${DAY_NAMES[d.getDay()]}، ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  function days() {
+    const out = []; const base = new Date(); base.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base); d.setDate(base.getDate() + i);
+      out.push({ i, label: dayLabelOf(d), short: DAY_NAMES[d.getDay()], num: d.getDate() });
+    }
+    return out;
+  }
+  const TIMES = [];
+  for (let m = 9 * 60; m <= 20 * 60; m += 30) {
+    const h = Math.floor(m / 60), mm = m % 60;
+    TIMES.push(`${h % 12 || 12}:${String(mm).padStart(2, '0')} ${h < 12 ? 'ص' : 'م'}`);
+  }
+  // Deterministic "already booked" slots so the grid looks real
+  const isBooked = (dayI, t) => (TIMES.indexOf(t) * 7 + Math.abs(dayI) * 3) % 5 === 0;
+
+  const dateStrip = (sel, attrDay, attrSet) => `
+    <div class="dates" role="group" aria-label="اختيار اليوم">
+      ${days().map(d => `<button class="dchip" aria-pressed="${sel.day === d.i}" ${attrDay}="${d.i}" data-label="${esc(d.label)}"><small>${d.short}</small><b>${d.num}</b></button>`).join('')}
+    </div>
+    <label class="field" style="margin-bottom:14px"><span class="small muted">أو اختاري تاريخاً آخر</span>
+      <input type="date" ${attrSet}="1" value="${sel.isoDate || ''}" aria-label="تاريخ آخر"></label>`;
+
+  const timeGrid = (sel, attr, dayI) => `
+    <div class="slots">
+      ${TIMES.map(t => {
+        const dis = isBooked(dayI, t);
+        return `<button class="slot" ${attr}="${esc(t)}" aria-pressed="${sel.time === t}" ${dis ? 'disabled' : ''}>${t}</button>`;
+      }).join('')}
+    </div>
+    <div class="legend"><span>● متاح</span><span>● محجوز</span></div>`;
+
+  // ---------- Booking flow (multi-step, mirrors the app) ----------
+  V.book = () => {
+    if (!S.user) return gate('الحجز');
+    ensure();
+    const b = S.bk;
+    const svc = SERVICES.find(x => x.id === b.svc) || SERVICES[0];
+    const staffName = b.staff === 'any' ? 'أي موظفة متاحة' : (STAFF.find(s => s.id === b.staff) || { name: '—' }).name;
+    const addr = (S.addrs.find(a => a.id === b.addr) || S.addrs[0]);
+    const titles = ['اختيار الموظفة', 'اختيار التاريخ والوقت', 'العنوان ورقم الهاتف', 'ملخص الحجز والدفع'];
+    const steps = [1, 2, 3, 4].map((n, k) => `${k ? `<i class="${n <= b.step ? 'on' : ''}"></i>` : ''}<span class="${n <= b.step ? 'on' : ''}">${n}</span>`).join('');
+    let body = '';
+
+    if (b.step === 1) {
+      body = `
+        <button class="pick" role="radio" aria-checked="${b.staff === 'any'}" data-bkset="staff" data-val="any">
+          <span class="av" style="--h:200">؟</span>
+          <span class="txt"><b>أي موظفة متاحة</b><small>أسرع موعد متاح ضمن الصالون</small></span>
+          <span class="radio"></span>
+        </button>
+        ${STAFF.map(s => `
+        <button class="pick" role="radio" aria-checked="${b.staff === s.id}" data-bkset="staff" data-val="${s.id}">
+          <span class="av" style="--h:${s.hue}">${esc(s.name[0])}</span>
+          <span class="txt"><b>${esc(s.name)}</b><small>${esc(s.role)} · ${s.rating} ★</small></span>
+          <span class="radio"></span>
+        </button>`).join('')}`;
+    } else if (b.step === 2) {
+      const dIdx = b.day;
+      body = `
+        <p class="bk-title">اختاري اليوم ثم الوقت المناسب</p>
+        ${dateStrip(b, 'data-bkday', 'data-bkdate')}
+        ${b.dayLabel ? `<p class="small muted" style="margin:-4px 0 10px">التاريخ المختار: ${esc(b.dayLabel)}</p>` : ''}
+        ${timeGrid(b, 'data-bktime', dIdx)}`;
+    } else if (b.step === 3) {
+      body = `
+        <p class="bk-title">عنوان الموعد</p>
+        ${S.addrs.map(a => `
+        <button class="pick" role="radio" aria-checked="${b.addr === a.id}" data-bkset="addr" data-val="${a.id}">
+          <span class="av" style="--h:340">${ic(ADDR_ICON, 'sm')}</span>
+          <span class="txt"><b>${esc(a.name)}</b><small>${esc(a.line)}</small></span>
+          <span class="radio"></span>
+        </button>`).join('')}
+        <button class="link" data-go="addresses">إضافة عنوان جديد</button>
+        <div class="field" style="margin-top:16px"><label for="bk-phone">رقم الهاتف للتواصل</label>
+          <input id="bk-phone" data-bkin="phone" type="tel" inputmode="tel" value="${esc(b.phone || addr.phone)}" placeholder="07XXXXXXXXX"></div>
+        <div class="field" style="margin-top:14px"><label for="bk-note">ملاحظات للموظفة (اختياري)</label>
+          <textarea id="bk-note" data-bkin="note" placeholder="مثال: حساسية من عطور معينة">${esc(b.note)}</textarea></div>`;
+    } else {
+      const pays = [['cash', 'الدفع عند الحضور'], ['card', 'بطاقة إلكترونية'], ['wallet', 'المحفظة (رصيد 200 IQD)']];
+      body = `
+        <div class="card sum" style="margin-bottom:16px">
+          <div class="r"><span>الخدمة</span><b>${esc(svc.name)}</b></div>
+          <div class="r"><span>الموظفة</span><b>${esc(staffName)}</b></div>
+          <div class="r"><span>التاريخ</span><b>${esc(b.dayLabel || days()[0].label)}</b></div>
+          <div class="r"><span>الوقت</span><b>${esc(b.time || '—')}</b></div>
+          <div class="r"><span>المدة</span><b>${svc.dur} دقيقة</b></div>
+          <div class="r"><span>العنوان</span><b>${esc(addr.line)}</b></div>
+          <div class="r"><span>الهاتف</span><b>${esc(b.phone || '—')}</b></div>
+          ${b.note ? `<div class="r"><span>ملاحظات</span><b>${esc(b.note)}</b></div>` : ''}
+          <div class="r"><span>الإجمالي</span><b>${price(svc.price)}</b></div>
+        </div>
+        <p class="bk-title">طريقة الدفع</p>
+        ${pays.map(([k, l]) => `
+        <button class="pick" role="radio" aria-checked="${b.pay === k}" data-bkset="pay" data-val="${k}">
+          <span class="txt"><b>${l}</b></span><span class="radio"></span>
+        </button>`).join('')}
+        <label class="check-row"><input type="checkbox" data-bkterms ${b.terms ? 'checked' : ''}> أوافق على شروط الحجز وسياسة الإلغاء (إلغاء مجاني قبل ساعتين من الموعد)</label>`;
+    }
+
+    const last = b.step === 4;
+    return `
+    <div class="page-title"><h1>${titles[b.step - 1]}</h1></div>
+    <div class="bk-steps" aria-label="خطوات الحجز">${steps}</div>
+    <p class="small muted" style="margin:-4px 0 14px">${esc(svc.name)} · ${esc(svc.center)}</p>
+    <section>${body}</section>
+    <div class="bk-foot">
+      ${b.step > 1 ? `<button class="btn ghost" data-bkback>السابق</button>` : `<button class="btn ghost" data-open="service" data-id="${svc.id}">رجوع</button>`}
+      <button class="btn" data-bknext>${last ? 'تأكيد الحجز' : 'التالي'}</button>
+    </div>`;
+  };
+
+  V.bookdone = () => {
+    ensure();
+    const bk = S.bookings.find(x => x.id === S.lastBk) || S.bookings[0];
+    return `
+    <section class="card ok-hero" style="margin-top:12px">
+      <div class="big">${ic('check')}</div>
+      <h2>تم استلام طلب حجزك</h2>
+      <p class="muted" style="margin:0 0 16px">رقم الحجز <b>${esc(bk.id)}</b>. سنؤكد موعدك قريباً.</p>
+      <div class="kv" style="text-align:start">
+        <div><span>الخدمة</span><b>${esc(bk.svc)}</b></div>
+        <div><span>الموعد</span><b>${esc(bk.date)} · ${esc(bk.time)}</b></div>
+        <div><span>الصالون</span><b>${esc(bk.center)}</b></div>
+      </div>
+      <div class="pill-row" style="justify-content:center;margin-top:18px">
+        <button class="btn" data-open="booking" data-id="${bk.id}">تفاصيل الحجز</button>
+        <button class="btn ghost" data-go="home">العودة للرئيسية</button>
+      </div>
+    </section>`;
+  };
+
+  V.booking = () => {
+    if (!S.user) return gate('تفاصيل الحجز');
+    ensure();
+    const bk = S.bookings.find(x => x.id === S.cur);
+    if (!bk) return `<div class="page-title"><h1>الحجز غير موجود</h1></div><button class="btn" data-go="bookings">حجوزاتي</button>`;
+    const upcoming = bk.state === 'upcoming';
+    const past = bk.state === 'past';
+    const rated = S.rated[bk.id];
+    return `
+    <div class="page-title"><h1>تفاصيل الحجز</h1></div>
+    <section class="card" style="padding:16px">
+      <div class="row-between" style="margin-bottom:12px"><span class="muted small">رقم الحجز ${esc(bk.id)}</span>${sttTag(bk.status, bk.label)}</div>
+      <h2 style="margin:0 0 4px">${esc(bk.svc)}</h2>
+      <div class="muted small">${esc(bk.center)}</div>
+      <div class="kv" style="margin-top:14px">
+        <div><span>التاريخ</span><b>${esc(bk.date)}</b></div>
+        <div><span>الوقت</span><b>${esc(bk.time)}</b></div>
+        <div><span>الموظفة</span><b>${esc(bk.staff || 'أي موظفة متاحة')}</b></div>
+        <div><span>المدة</span><b>${bk.dur} دقيقة</b></div>
+        <div><span>العنوان</span><b>${esc(bk.addr || ADDRESSES[0].line)}</b></div>
+        <div><span>الدفع</span><b>${bk.pay === 'card' ? 'بطاقة إلكترونية' : bk.pay === 'wallet' ? 'المحفظة' : 'عند الحضور'}</b></div>
+        <div><span>السعر</span><b>${price(bk.price)}</b></div>
+      </div>
+    </section>
+    ${upcoming ? `
+    <div class="pill-row" style="margin-top:16px">
+      <button class="btn ghost" data-go="reschedule" data-id="${bk.id}">إعادة الجدولة</button>
+      <button class="btn ghost" data-go="chat">المحادثة مع الصالون</button>
+      <button class="btn danger" data-cancel-ask="${bk.id}">إلغاء الحجز</button>
+    </div>
+    ${S.confirmCancel === bk.id ? `
+    <section class="card" style="padding:16px;margin-top:14px;border-color:var(--bad)">
+      <h3 style="margin:0 0 6px">هل أنتِ متأكدة من الإلغاء؟</h3>
+      <p class="muted small" style="margin:0 0 12px">لا يمكن التراجع عن هذا الإجراء بعد التأكيد.</p>
+      <div class="pill-row"><button class="btn danger" data-cancel="${bk.id}">نعم، إلغاء الحجز</button><button class="btn ghost" data-confirm-no>تراجع</button></div>
+    </section>` : ''}` : ''}
+    ${past && !rated ? `
+    <section class="card" style="padding:16px;margin-top:16px">
+      <h3 style="margin:0 0 6px">قيّمي تجربتك</h3>
+      <div class="stars">${[1, 2, 3, 4, 5].map(n => `<button aria-label="${n} نجوم" data-rate="${bk.id}" data-val="${n}">${ic('star')}</button>`).join('')}</div>
+    </section>` : ''}
+    ${past && rated ? `<p class="note-box" style="margin-top:16px">شكراً على تقييمك (${rated} من 5).</p>` : ''}
+    `;
+  };
+
+  V.reschedule = () => {
+    if (!S.user) return gate('إعادة الجدولة');
+    ensure();
+    const bk = S.bookings.find(x => x.id === S.cur);
+    if (!bk) return `<button class="btn" data-go="bookings">حجوزاتي</button>`;
+    const r = S.rs;
+    return `
+    <div class="page-title"><h1>إعادة جدولة الموعد</h1></div>
+    <p class="small muted" style="margin:-4px 0 14px">الموعد الحالي: ${esc(bk.date)} · ${esc(bk.time)}</p>
+    ${dateStrip(r, 'data-rsday', 'data-rsdate')}
+    ${r.dayLabel ? `<p class="small muted" style="margin:-4px 0 10px">الموعد الجديد: ${esc(r.dayLabel)}</p>` : ''}
+    ${timeGrid(r, 'data-rstime', r.day)}
+    <div class="bk-foot"><button class="btn ghost" data-open="booking" data-id="${bk.id}">رجوع</button><button class="btn" data-rsok>تأكيد الموعد الجديد</button></div>`;
+  };
+
+  V.chat = () => {
+    if (!S.user) return gate('المحادثة');
+    ensure();
+    return `
+    <div class="page-title"><h1>المحادثة مع الصالون</h1></div>
+    <div class="bubbles">${S.chat.map(m => `<div class="bub ${m.me ? 'me' : 'them'}">${esc(m.t)}<small>${m.at}</small></div>`).join('')}</div>
+    <div class="chat-bar"><input id="chatIn" type="text" placeholder="اكتبي رسالتك..." aria-label="اكتبي رسالتك"><button class="btn sm" data-chatsend>إرسال</button></div>
+    <p class="sample">محادثة تجريبية: لا تُرسل إلى الصالون فعلياً</p>`;
+  };
+
+  V.service = () => {
+    const s = SERVICES.find(x => x.id === S.cur) || SERVICES[0];
+    return `
+    <div class="detail-hero" style="position:relative">${ph(s.hue, 'sparkle')}${s.disc ? `<span class="badge">-${s.disc}%</span>` : ''}${favBtn(s.id)}</div>
+    <div class="page-title" style="margin-top:16px"><h1>${esc(s.name)}</h1></div>
+    <div class="row-between" style="margin-bottom:12px">
+      <span class="muted small">${ic('star', 'sm')} ${s.rating} · ${esc(s.center)}</span>
+      <span class="tag">${esc(s.cat)}</span>
+    </div>
+    <section class="card" style="padding:16px">
+      <div class="kv">
+        <div><span>السعر</span><b>${price(s.price)} ${oldP(s.old)}</b></div>
+        <div><span>المدة</span><b>${s.dur} دقيقة</b></div>
+        <div><span>الموظفة</span><b>اختيار حر</b></div>
+      </div>
+    </section>
+    <section style="margin-top:18px"><h2 style="font-size:16px;margin:0 0 8px">عن الخدمة</h2>
+      <p class="muted" style="line-height:1.8;margin:0;max-width:65ch">خدمة يقدمها فريق معتمد داخل ${esc(s.center)}، تبدأ بتقييم سريع لاحتياجك ثم تنفيذ الخدمة بمنتجات مناسبة لنوع بشرتك أو شعرك، ومدتها ${s.dur} دقيقة تقريباً.</p>
+    </section>
+    <div class="bk-foot" style="position:sticky;bottom:0;background:var(--bg);padding-block:12px">
+      <button class="btn block" data-book="${s.id}">احجزي الآن</button>
+    </div>`;
+  };
+
+  V.salon = () => {
+    const sa = SALONS.find(x => x.id === S.cur) || SALONS[0];
+    ensure();
+    const tabs = [['svc', 'الخدمات'], ['staff', 'الموظفات'], ['rev', 'التقييمات']];
+    let body = '';
+    if (S.salTab === 'svc') body = `<div class="grid">${SERVICES.slice(0, 6).map(s => serviceCard(s)).join('')}</div>`;
+    if (S.salTab === 'staff') body = `<div class="grid">${STAFF.map(st => `
+      <article class="card item"><div style="position:relative">${ph(st.hue, 'user')}</div>
+      <div class="body"><h3>${esc(st.name)}</h3><div class="meta">${esc(st.role)} · ${st.rating} ★</div></div></article>`).join('')}</div>`;
+    if (S.salTab === 'rev') body = `<div class="list">${REVIEWS.map(r => `
+      <div class="list-row" style="display:block"><div class="row-between"><b>${esc(r.n)}</b>${stars(r.r)}</div><p class="muted small" style="margin:6px 0">${esc(r.t)}</p><span class="small muted">${r.d}</span></div>`).join('')}</div>`;
+    return `
+    <div class="detail-hero" style="position:relative">${ph(sa.hue, 'pin')}${sa.featured ? '<span class="featured">مميز</span>' : ''}${favBtn(sa.id)}</div>
+    <div class="page-title" style="margin-top:16px"><h1>${esc(sa.name)}</h1></div>
+    <div class="muted small">${ic('star', 'sm')} ${sa.rating} (${sa.n}) · ${esc(sa.area)} · ${sa.dist}</div>
+    <div class="tags" style="margin:10px 0 16px">${sa.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
+    <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${S.salTab === k}" data-saltab="${k}">${l}</button>`).join('')}</div>
+    <section style="margin-top:16px"><h2 style="font-size:16px;margin:0 0 10px">معرض الصور</h2><div class="gal-strip">${galleryOf(sa).map((g, k) => `<button data-gal="${k}" aria-label="${g.t}">${ph(g.h, 'sparkle')}</button>`).join('')}</div></section><section style="margin-top:16px">${body}</section>`;
+  };
+
+  V.product = () => {
+    const p = PRODUCTS.find(x => x.id === S.cur) || PRODUCTS[0];
+    return `
+    <div class="detail-hero" style="position:relative">${ph(p.hue, 'sparkle', 'sq')}${p.disc ? `<span class="badge">خصم %${p.disc}</span>` : ''}${favBtn(p.id)}</div>
+    <span class="cat" style="margin-top:14px;display:block">${esc(p.brand)}</span>
+    <div class="page-title"><h1>${esc(p.name)}</h1></div>
+    <div class="muted small">${ic('star', 'sm')} ${p.rating} (${p.n} تقييم)</div>
+    <div style="margin:12px 0 18px">${price(p.price)} ${oldP(p.old)}</div>
+    <section class="card" style="padding:16px">
+      <p class="muted" style="margin:0;line-height:1.8;max-width:65ch">منتج من فئة ${esc(p.cat)} مختار بعناية، مناسب للاستخدام اليومي. اتبعي التعليمات المرفقة وأوقفي الاستخدام عند ظهور أي تهيج.</p>
+    </section>
+    <div class="bk-foot" style="position:sticky;bottom:0;background:var(--bg);padding-block:12px">
+      <button class="btn block" data-add="${p.id}">${ic('cart', 'sm')} أضيفي إلى السلة</button>
+    </div>`;
+  };
+
+  V.services = () => {
+    ensure();
+    const list = SERVICES.filter(s => S.svcCat === 'الكل' || s.cat === S.svcCat);
+    return `
+    <div class="page-title"><h1>جميع الخدمات</h1></div>
+    <div class="chips" style="margin-bottom:16px">${SVC_CATS.map(c => `<button class="chip" aria-pressed="${S.svcCat === c}" data-svcat="${c}">${c}</button>`).join('')}</div>
+    <div class="grid">${list.map(s => serviceCard(s)).join('') || '<p class="muted">لا توجد خدمات في هذا القسم حالياً.</p>'}</div>
+    ${sampleNote}`;
+  };
+
+  V.near = () => `
+    <div class="page-title"><h1>قريب مني</h1></div>
+    <div class="map-box" role="img" aria-label="خريطة تقريبية">
+      <div class="grid-lines"></div>
+      <div class="pin-big">${ic('pin')}</div>
+    </div>
+    <p class="sample" style="margin:8px 0 16px">خريطة تقريبية للعرض. الموقع الدقيق يُحدد من التطبيق.</p>
+    <div class="grid">${SALONS.map(salonCard).join('')}</div>`;
+
+  V.reviews = () => `
+    <div class="page-title"><h1>التقييمات</h1></div>
+    <div class="list">${REVIEWS.map(r => `
+      <div class="list-row" style="display:block"><div class="row-between"><b>${esc(r.n)}</b>${stars(r.r)}</div><p class="muted small" style="margin:6px 0">${esc(r.t)}</p><span class="small muted">${r.d}</span></div>`).join('')}</div>
+    ${sampleNote}`;
+
+  V.checkout = () => {
+    if (!S.user) return gate('الدفع');
+    ensure();
+    const lines = Object.entries(S.cart).map(([id, q]) => ({ p: PRODUCTS.find(x => x.id === id), q })).filter(x => x.p);
+    if (!lines.length) return `<div class="page-title"><h1>الدفع</h1></div><section class="card empty"><h2 style="color:var(--fg)">سلتك فارغة</h2><p style="margin:6px 0 16px">أضيفي منتجاتك أولاً ثم أكملي الطلب.</p><button class="btn" data-go="store">تصفح المتجر</button></section>`;
+    const sub = lines.reduce((a, l) => a + l.p.price * l.q, 0);
+    const ship = S.ck.del === 'exp' ? 5000 : 2000;
+    const disc = discountFor(sub);
+    const total = sub + ship - disc;
+    const addr = S.addrs.find(a => a.id === S.ck.addr) || S.addrs[0];
+    const pays = [['cash', 'الدفع عند الاستلام'], ['card', 'بطاقة إلكترونية'], ['wallet', 'المحفظة']];
+    return `
+    <div class="page-title"><h1>إتمام الطلب</h1></div>
+    <h2 style="font-size:15px;margin:0 0 8px">عنوان التوصيل</h2>
+    ${S.addrs.map(a => `
+      <button class="pick" role="radio" aria-checked="${S.ck.addr === a.id}" data-ckset="addr" data-val="${a.id}">
+        <span class="txt"><b>${esc(a.name)}</b><small>${esc(a.line)}</small></span><span class="radio"></span></button>`).join('')}
+    <button class="link" data-go="addresses">إدارة العناوين</button>
+
+    <h2 style="font-size:15px;margin:18px 0 8px">طريقة التوصيل</h2>
+    <button class="pick" role="radio" aria-checked="${S.ck.del === 'std'}" data-ckset="del" data-val="std"><span class="txt"><b>توصيل عادي</b><small>خلال 1–2 يوم عمل</small></span><span class="radio"></span></button>
+    <button class="pick" role="radio" aria-checked="${S.ck.del === 'exp'}" data-ckset="del" data-val="exp"><span class="txt"><b>توصيل سريع</b><small>خلال نفس اليوم</small></span><span class="radio"></span></button>
+
+    <h2 style="font-size:15px;margin:18px 0 8px">طريقة الدفع</h2>
+    ${pays.map(([k, l]) => `<button class="pick" role="radio" aria-checked="${S.ck.pay === k}" data-ckset="pay" data-val="${k}"><span class="txt"><b>${l}</b></span><span class="radio"></span></button>`).join('')}
+
+    <h2 style="font-size:15px;margin:18px 0 8px">كوبون الخصم</h2>
+    <div class="chat-bar" style="position:static;padding:0">
+      <input data-ckin="coupon" type="text" value="${esc(S.ck.coupon)}" placeholder="أدخلي الرمز" aria-label="رمز الكوبون">
+      <button class="btn sm" data-coupapply>تطبيق</button>
+    </div>
+    <p class="sample">أكواد تجريبية: BZ20 (خصم 20%)، WELCOME10 (خصم 10%)، IQD30 (منتهي الصلاحية)</p>
+
+    <div class="field" style="margin-top:14px"><label for="ck-note">ملاحظة للتوصيل (اختياري)</label>
+      <textarea id="ck-note" data-ckin="note" placeholder="مثال: الاتصال قبل الوصول">${esc(S.ck.note)}</textarea></div>
+
+    <div class="card sum" style="margin-top:18px">
+      ${lines.map(l => `<div class="r"><span>${esc(l.p.name)} × ${l.q}</span><b>${(l.p.price * l.q).toLocaleString('en-US')} IQD</b></div>`).join('')}
+      <div class="r"><span>التوصيل</span><b>${ship.toLocaleString('en-US')} IQD</b></div>
+      ${disc ? `<div class="r"><span>الخصم</span><b>- ${disc.toLocaleString('en-US')} IQD</b></div>` : ''}
+      <div class="r"><span>الإجمالي</span><b>${total.toLocaleString('en-US')} IQD</b></div>
+    </div>
+    <p class="small muted" style="margin:10px 0 0">التوصيل إلى: ${esc(addr.line)}</p>
+    <label class="check-row"><input type="checkbox" data-ckterms ${S.ck.terms ? 'checked' : ''}> أوافق على شروط البيع وسياسة الإرجاع</label>
+    <div class="bk-foot"><button class="btn ghost" data-go="cart">السلة</button><button class="btn" data-placeorder>إتمام الطلب</button></div>`;
+  };
+
+  V.ordersuccess = () => {
+    ensure();
+    const o = S.orders.find(x => x.id === S.lastOrder) || S.orders[0];
+    return `
+    <section class="card ok-hero" style="margin-top:12px">
+      <div class="big">${ic('check')}</div>
+      <h2>تم استلام طلبك</h2>
+      <p class="muted" style="margin:0 0 16px">رقم الطلب <b>${esc(o.id)}</b>. سنعلمك عند الشحن.</p>
+      <div class="kv" style="text-align:start"><div><span>الإجمالي</span><b>${o.total.toLocaleString('en-US')} IQD</b></div><div><span>العنوان</span><b>${esc(o.addr)}</b></div></div>
+      <div class="pill-row" style="justify-content:center;margin-top:18px">
+        <button class="btn" data-open="order" data-id="${o.id}">تتبع الطلب</button>
+        <button class="btn ghost" data-go="store">متابعة التسوق</button>
+      </div>
+    </section>`;
+  };
+
+  V.orders = () => {
+    if (!S.user) return gate('طلباتي');
+    ensure();
+    return `
+    <div class="page-title"><h1>طلباتي</h1></div>
+    <div class="list">${S.orders.map(o => `
+      <button class="list-row" data-open="order" data-id="${o.id}">
+        <span class="ico" style="background:linear-gradient(135deg,hsl(${o.hue} 38% 62%),hsl(${o.hue} 34% 40%));color:#fff">${ic('truck', 'sm')}</span>
+        <span class="txt"><b>طلب ${esc(o.id)}</b><small class="muted small" style="display:block">${esc(o.date)} · ${o.items.length} منتجات</small></span>
+        ${sttTag(o.st, o.state)}
+      </button>`).join('')}</div>`;
+  };
+
+  V.order = () => {
+    ensure();
+    const o = S.orders.find(x => x.id === S.cur) || S.orders[0];
+    const done = o.st === 'ok';
+    return `
+    <div class="page-title"><h1>طلب ${esc(o.id)}</h1></div>
+    <section class="card" style="padding:16px">
+      <div class="row-between" style="margin-bottom:12px"><span class="muted small">${esc(o.date)}</span>${sttTag(o.st, o.state)}</div>
+      <div class="steps-v">
+        <div class="on"><span>✓</span>تم تأكيد الطلب</div>
+        <div class="on"><span>✓</span>تم تجهيز الطلب</div>
+        <div class="${done ? 'on' : ''}"><span>${done ? '✓' : '3'}</span>${done ? 'تم التسليم' : 'جاري التوصيل'}</div>
+      </div>
+    </section>
+    <h2 style="font-size:15px;margin:18px 0 8px">المنتجات</h2>
+    <div class="list">${o.items.map(i => `<div class="list-row"><span class="txt">${esc(i)}</span></div>`).join('')}</div>
+    <section class="card kv" style="padding:4px 16px;margin-top:16px">
+      <div><span>العنوان</span><b>${esc(o.addr)}</b></div>
+      <div><span>الإجمالي</span><b>${o.total.toLocaleString('en-US')} IQD</b></div>
+    </section>
+    <div class="pill-row" style="margin-top:16px"><button class="btn ghost" data-go="help">مساعدة بخصوص الطلب</button></div>`;
+  };
+
+  V.addresses = () => {
+    if (!S.user) return gate('عناوينك');
+    ensure();
+    const d = S.addDraft;
+    return `
+    <div class="page-title"><h1>عناويني</h1></div>
+    <section class="card">${S.addrs.map(a => `
+      <div class="addr-card"><span class="ico">${ic('pin', 'sm')}</span>
+        <div class="txt"><b>${esc(a.name)}</b><small>${esc(a.line)}</small><br><small>${esc(a.phone)}</small></div>
+        <button class="btn ghost sm" data-addrdel="${a.id}" aria-label="حذف العنوان">${ic('trash', 'sm')}</button>
+      </div>`).join('') || '<div class="addr-card">لا توجد عناوين محفوظة</div>'}</section>
+    <button class="btn ghost block" style="margin-top:16px" data-go="pickmap">تحديد الموقع على الخريطة</button>
+    <button class="btn block" style="margin-top:10px" data-addtoggle>${S.addOpen ? 'إغلاق النموذج' : 'إضافة عنوان جديد'}</button>
+    ${S.addOpen ? `
+    <section class="card form-card">
+      <div class="field"><label for="ad-name">اسم العنوان</label><input id="ad-name" data-adin="name" value="${esc(d.name)}" placeholder="المنزل، العمل..."></div>
+      <div class="field"><label for="ad-line">تفاصيل العنوان</label><input id="ad-line" data-adin="line" value="${esc(d.line)}" placeholder="المحافظة، الحي، الشارع، رقم البناية"></div>
+      <div class="field"><label for="ad-phone">رقم الهاتف</label><input id="ad-phone" data-adin="phone" type="tel" inputmode="tel" value="${esc(d.phone)}" placeholder="07XXXXXXXXX"></div>
+      <button class="btn block" data-addsave>حفظ العنوان</button>
+    </section>` : ''}
+    ${sampleNote}`;
+  };
+
+  V.gym = () => {
+    const plans = SERVICES.filter(s => s.cat === 'اللياقة');
+    return `
+    <div class="page-title"><h1>خدمات اللياقة البدنية</h1></div>
+    <section class="card" style="padding:18px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:0">
+      <span class="tag" style="background:rgba(255,255,255,.2);color:#fff">عرض الشهر</span>
+      <h2 style="color:#fff;margin:10px 0 4px">اشتراك شهري بخصم 22%</h2>
+      <p style="margin:0 0 14px;opacity:.9">صالة كاملة وجلسات جماعية في نادي أفق الرياضي.</p>
+      <button class="btn" style="background:#fff;color:var(--primary-dark);box-shadow:none" data-book="f1">اشتركي الآن</button>
+    </section>
+    <h2 style="font-size:16px;margin:20px 0 10px">الباقات والجلسات</h2>
+    <div class="grid">${plans.map(s => serviceCard(s)).join('')}</div>
+    ${sampleNote}`;
+  };
+
+  V.offers = () => {
+    if (!S.user) return gate('العروض');
+    return `
+    <div class="page-title"><h1>العروض</h1></div>
+    <div class="grid">${COUPONS.map(c => `
+      <article class="card item"><div style="position:relative;aspect-ratio:auto;padding:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;min-height:110px"><b style="font-size:28px">${esc(c.val)}${c.unit ? ' ' + c.unit : ''}</b></div>
+      <div class="body"><h3>${esc(c.title)}</h3><div class="meta">الحد الأدنى ${c.min} IQD · حتى ${esc(c.until)}</div>
+        <div class="row-between">${sttTag(c.st === 'expired' ? 'mute' : 'ok', c.st === 'expired' ? 'منتهي' : 'متاح')}
+        <button class="btn sm" ${c.st === 'expired' ? 'disabled' : `data-act="toast" data-msg="تم تفعيل العرض، أضيفيه عند الدفع"`}>تفعيل</button></div></div></article>`).join('')}</div>
+    ${sampleNote}`;
+  };
+
+  V.articles = () => `
+    <div class="page-title"><h1>المقالات</h1></div>
+    <div class="grid">${ARTICLES.map(a => `
+      <article class="card item" data-open="article" data-id="${a.id}" style="cursor:pointer">
+        <div>${ph(a.hue, 'sparkle')}</div>
+        <div class="body"><span class="cat">${esc(a.cat)}</span><h3>${esc(a.t)}</h3><div class="meta">قراءة 3 دقائق</div></div>
+      </article>`).join('')}</div>`;
+
+  V.article = () => {
+    const a = ARTICLES.find(x => x.id === S.cur) || ARTICLES[0];
+    return `
+    <div class="detail-hero">${ph(a.hue, 'sparkle')}</div>
+    <span class="cat" style="margin-top:14px;display:block">${esc(a.cat)}</span>
+    <div class="page-title"><h1>${esc(a.t)}</h1></div>
+    <div class="article-body">${a.body.map(p => `<p>${esc(p)}</p>`).join('')}</div>
+    <div class="pill-row"><button class="btn ghost" data-go="articles">كل المقالات</button></div>`;
+  };
+
+  V.help = () => `
+    <div class="page-title"><h1>مركز المساعدة</h1></div>
+    <section class="card faq" style="padding:6px 16px">
+      ${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}
+    </section>
+    <div class="pill-row" style="margin-top:16px"><button class="btn" data-go="support">تواصلي مع الدعم</button></div>`;
+
+  V.support = () => {
+    if (!S.user) return gate('الدعم');
+    ensure();
+    return `
+    <div class="page-title"><h1>الدعم</h1></div>
+    <div class="bubbles">${S.support.map(m => `<div class="bub ${m.me ? 'me' : 'them'}">${esc(m.t)}<small>${m.at}</small></div>`).join('')}</div>
+    <div class="chat-bar"><input id="supIn" type="text" placeholder="اكتبي رسالتك..." aria-label="اكتبي رسالتك"><button class="btn sm" data-supsend>إرسال</button></div>
+    <p class="sample">نسخة تجريبية: الرسائل محلية ولا تصل إلى فريق الدعم</p>`;
+  };
+
+  // ---------- Map picker (schematic, tap to place pin) ----------
+  const DISTRICTS = [
+    { n: 'الكرادة', x: 150, y: 150 }, { n: 'المنصور', x: 70, y: 80 }, { n: 'الجادرية', x: 210, y: 196 },
+    { n: 'الصالحية', x: 120, y: 58 }, { n: 'الأعظمية', x: 200, y: 36 }, { n: 'الكاظمية', x: 52, y: 30 }, { n: 'الدورة', x: 60, y: 196 }
+  ];
+  const nearestDistrict = (x, y) => DISTRICTS.reduce((a, d) => (Math.hypot(d.x - x, d.y - y) < Math.hypot(a.x - x, a.y - y) ? d : a));
+  const mpInit = () => {
+    if (!S.mp) S.mp = { x: 150, y: 150, name: 'الكرادة', detail: '' };
+    if (S.mp.detail === undefined) S.mp.detail = '';
+  };
+
+  // ---------- Coupons (real validation rules, local to this page) ----------
+  const CODES = {
+    BZ20: { pct: 20, min: 200, until: '2027-12-31' },
+    WELCOME10: { pct: 10, min: 100, until: '2027-06-30' },
+    IQD30: { fixed: 30, min: 150, until: '2026-10-01' }
+  };
+  const cartSubtotal = () => Object.entries(S.cart).reduce((a, [id, q]) => {
+    const p = PRODUCTS.find(x => x.id === id); return a + (p ? p.price * q : 0);
+  }, 0);
+  function discountFor(sub) {
+    const c = S.ck && S.ck.code ? CODES[S.ck.code] : null;
+    if (!c) return 0;
+    return c.pct ? Math.round(sub * c.pct / 100) : c.fixed;
+  }
+  function applyCoupon() {
+    ensure();
+    const code = (S.ck.coupon || '').trim().toUpperCase();
+    const c = CODES[code];
+    S.ck.code = '';
+    if (!c) { toast('الرمز غير صحيح'); render(true); return; }
+    if ((S.usedCodes || []).includes(code)) { toast('تم استخدام هذا الرمز من قبل'); render(true); return; }
+    if (c.until < new Date().toISOString().slice(0, 10)) { toast('انتهت صلاحية هذا الرمز'); render(true); return; }
+    const sub = cartSubtotal();
+    if (sub < c.min) { toast(`الحد الأدنى للطلب ${c.min.toLocaleString('en-US')} IQD لهذا الرمز`); render(true); return; }
+    S.ck.code = code;
+    toast('تم تطبيق الخصم');
+    render(true);
+  }
+
+  // ---------- Gallery ----------
+  const galleryOf = sa => [
+    { h: sa.hue, t: 'الاستقبال' }, { h: (sa.hue + 40) % 360, t: 'منطقة العناية' },
+    { h: (sa.hue + 80) % 360, t: 'غرفة المكياج' }, { h: (sa.hue + 320) % 360, t: 'الصالة الرئيسية' }
+  ];
+  function galStep(d) {
+    if (!S.gal) return;
+    const sa = SALONS.find(x => x.id === S.gal.id) || SALONS[0];
+    const n = galleryOf(sa).length;
+    S.gal.i = (S.gal.i + d + n) % n;
+    render(true);
+  }
+  V.gallery = () => {
+    if (!S.gal) S.gal = { id: 'sa1', i: 0 };
+    const sa = SALONS.find(x => x.id === S.gal.id) || SALONS[0];
+    const imgs = galleryOf(sa);
+    const i = Math.min(S.gal.i, imgs.length - 1);
+    const cur = imgs[i];
+    return `
+    <div class="page-title"><h1>معرض الصور</h1><button class="link" data-go="salon">رجوع</button></div>
+    <div class="gal-stage" aria-live="polite">
+      ${ph(cur.h, 'sparkle')}
+      <button class="gal-nav prev" data-galnav="-1" aria-label="الصورة السابقة">${ic('back', 'sm')}</button>
+      <button class="gal-nav next" data-galnav="1" aria-label="الصورة التالية">${ic('chev', 'sm')}</button>
+    </div>
+    <div class="row-between" style="margin-top:12px"><b>${cur.t}</b><span class="muted small">${i + 1} / ${imgs.length}</span></div>
+    <div class="gal-dots">${imgs.map((_, k) => `<button data-galdot="${k}" aria-label="صورة ${k + 1}" aria-pressed="${k === i}"></button>`).join('')}</div>
+    <p class="sample">صور توضيحية بألوان مؤقتة. الصور الحقيقية تُرفع من لوحة الصالون.</p>`;
+  };
+
+  // ---------- Map picker view ----------
+  V.pickmap = () => {
+    ensure(); mpInit();
+    const m = S.mp;
+    return `
+    <div class="page-title"><h1>تحديد الموقع</h1></div>
+    <div class="map-live"><svg id="mapSvg" viewBox="0 0 300 240" role="img" aria-label="خريطة تخطيطية لبغداد، اضغطي لتحديد الموقع" style="width:100%;height:100%;display:block;cursor:crosshair">
+      <rect width="300" height="240" fill="var(--soft)"/>
+      <path d="M0 128 C90 100 150 150 300 116" stroke="#3B82F6" stroke-opacity=".3" stroke-width="14" fill="none" stroke-linecap="round"/>
+      ${DISTRICTS.map(d => `<circle cx="${d.x}" cy="${d.y}" r="3.5" fill="var(--muted)"/><text x="${d.x + 6}" y="${d.y + 4}" font-size="11" fill="var(--fg)">${d.n}</text>`).join('')}
+      <g transform="translate(${m.x} ${m.y})"><circle r="13" fill="var(--primary)" opacity=".18"/><circle r="5.5" fill="var(--primary)" stroke="#fff" stroke-width="2"/></g>
+    </svg></div>
+    <p class="small muted" style="margin:8px 0 0">اضغطي على الخريطة لتحديد نقطة التوصيل، أو اختاري حياً من القائمة.</p>
+    <div class="dist-chips">${DISTRICTS.map((d, k) => `<button class="chip" aria-pressed="${m.name === d.n}" data-mpdist="${k}">${d.n}</button>`).join('')}</div>
+    <div class="field"><label for="mp-detail">الشارع ورقم البناية</label><input id="mp-detail" data-mpin="detail" value="${esc(m.detail)}" placeholder="شارع 62، بناية 14"></div>
+    <p class="sample">الخريطة تخطيطية للعرض وليست خريطة جغرافية دقيقة.</p>
+    <div class="bk-foot"><button class="btn ghost" data-go="addresses">إلغاء</button><button class="btn" data-mpok>تأكيد الموقع</button></div>`;
+  };
+
+  // ---------- Live support & salon chat (rule-based automatic replies) ----------
+  const EMOJI = ['😀', '😊', '😍', '💅', '💇‍♀️', '✨', '💖', '👍', '🙏', '🌸', '📅', '⏰', '📍', '📞', '✅', '❌', '🎉', '💬', '🤍', '☕'];
+  const isOpenNow = () => {
+    const h = parseInt(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Baghdad', hour: 'numeric', hour12: false }).format(new Date()), 10);
+    return h >= 9 && h < 22;
+  };
+  const RULES = [
+    [/إلغ|الغاء|تأجيل|تغيير|موعد/, 'يمكن إلغاء الحجز أو تغيير موعده من صفحة تفاصيل الحجز قبل الموعد بساعتين على الأقل.'],
+    [/دفع|بطاقة|محفظة|رصيد|سعر/, 'نقبل الدفع عند الحضور أو عند الاستلام، والبطاقة الإلكترونية والمحفظة.'],
+    [/توصيل|شحن|طلب|تتبع|وصل/, 'التوصيل العادي يستغرق من يوم إلى يومين عمل، والسريع يصل في نفس اليوم. يمكنك متابعة الطلب من طلباتي.'],
+    [/كوبون|خصم|رمز|عرض/, 'أدخلي رمز الكوبون في صفحة الدفع. لكل رمز حد أدنى للطلب ومدة صلاحية.'],
+    [/حجز|موظف|حجز/, 'يمكنك اختيار الموظفة والموعد من خطوات الحجز، وسيتم تأكيد الطلب.']
+  ];
+  const replyFor = t => {
+    const hit = RULES.find(([re]) => re.test(t));
+    if (hit) return hit[1];
+    return isOpenNow()
+      ? 'استلمنا رسالتك. هذا رد آلي؛ لمتابعة طلبك بشرياً اكتبي تفاصيله هنا وسيتم تحويلها إلى فريق الدعم.'
+      : 'استلمنا رسالتك خارج ساعات الدوام (٩ ص – ١٠ م بتوقيت بغداد). سيُرد عليك في أول ساعات الدوام.';
+  };
+  function sendMsg(key) {
+    ensure();
+    const inp = document.getElementById(key + 'In');
+    const text = ((inp && inp.value) || S[key + 'Draft'] || '').trim();
+    if (!text) { toast('اكتبي رسالة أولاً'); return; }
+    const list = key === 'chat' ? S.chat : S.support;
+    list.push({ me: true, t: text, at: nowAt() });
+    S[key + 'Draft'] = ''; S.emoFor = null; S.typing = key;
+    render(true);
+    const route = S.route;
+    setTimeout(() => {
+      list.push({ me: false, t: replyFor(text), at: nowAt(), auto: true });
+      if (S.typing === key) S.typing = null;
+      if (S.route === route) render(true);
+    }, 1100);
+  }
+  const liveBlock = (list, key) => {
+    const open = isOpenNow();
+    return `
+    <div class="live-bar ${open ? 'on' : ''}"><span class="dot"></span>${open ? 'الفريق متاح الآن للرد على رسائلك' : 'خارج ساعات الدوام: ٩ ص – ١٠ م (بتوقيت بغداد)'}</div>
+    <div class="bubbles" role="log" aria-live="polite">
+      ${list.map(m => `<div class="bub ${m.me ? 'me' : 'them'}">${esc(m.t)}<small>${m.at}${m.auto ? ' · رد آلي' : ''}</small></div>`).join('')}
+      ${S.typing === key ? '<div class="bub them typing" aria-label="يكتب الآن">…</div>' : ''}
+    </div>
+    ${S.emoFor === key ? `<div class="emo-grid">${EMOJI.map(e => `<button data-emoadd="${e}" data-emokey="${key}" aria-label="${e}">${e}</button>`).join('')}</div>` : ''}
+    <div class="chat-bar">
+      <button class="icon-btn" data-emotoggle="${key}" aria-label="إضافة إيموجي" aria-expanded="${S.emoFor === key}" style="flex:none">😊</button>
+      <input id="${key}In" type="text" value="${esc(S[key + 'Draft'] || '')}" placeholder="اكتبي رسالتك..." aria-label="اكتبي رسالتك">
+      <button class="btn sm" data-send="${key}">إرسال</button>
+    </div>`;
+  };
+  V.chat = () => {
+    if (!S.user) return gate('المحادثة');
+    ensure();
+    return `
+    <div class="page-title"><h1>المحادثة مع الصالون</h1></div>
+    ${liveBlock(S.chat, 'chat')}
+    <p class="sample">الردود آلية ومحلية في هذه النسخة، ولا تصل الرسائل إلى الصالون.</p>`;
+  };
+  V.support = () => {
+    if (!S.user) return gate('الدعم');
+    ensure();
+    return `
+    <div class="page-title"><h1>الدعم الحيّ</h1></div>
+    ${liveBlock(S.support, 'sup')}
+    <p class="sample">الردود آلية ومحلية في هذه النسخة، ولا تصل الرسائل إلى فريق الدعم الفعلي.</p>`;
+  };
+
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.id === 'chatIn') S.chatDraft = t.value;
+    if (t.id === 'supIn') S.supDraft = t.value;
+    if (t.dataset && t.dataset.mpin !== undefined) { mpInit(); S.mp.detail = t.value; }
+  });
+  document.addEventListener('pointerdown', e => {
+    const svg = e.target.closest && e.target.closest('#mapSvg');
+    if (!svg) return;
+    mpInit();
+    const r = svg.getBoundingClientRect();
+    S.mp.x = Math.max(8, Math.min(292, (e.clientX - r.left) / r.width * 300));
+    S.mp.y = Math.max(8, Math.min(232, (e.clientY - r.top) / r.height * 240));
+    S.mp.name = nearestDistrict(S.mp.x, S.mp.y).n;
+    render(true);
+  });
+  let galX = null;
+  document.addEventListener('touchstart', e => {
+    galX = e.target.closest && e.target.closest('.gal-stage') ? e.touches[0].clientX : null;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (galX === null) return;
+    const dx = e.changedTouches[0].clientX - galX; galX = null;
+    if (Math.abs(dx) > 40) galStep(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+
+  // ---------- Routing & rendering ----------
+  const ROUTES = ['home', 'store', 'favorites', 'bookings', 'search', 'profile', 'account', 'payment', 'points', 'notifications', 'cart', 'login', 'book', 'bookdone', 'booking', 'reschedule', 'chat', 'service', 'salon', 'product', 'services', 'near', 'reviews', 'checkout', 'ordersuccess', 'orders', 'order', 'addresses', 'gym', 'offers', 'articles', 'article', 'help', 'support', 'pickmap', 'gallery'];
+  const app = document.getElementById('app');
+
+  function render(keepScroll) {
+    let r = (location.hash || '#home').slice(1);
+    if (!ROUTES.includes(r)) r = 'home';
+    S.route = r;
+    app.innerHTML = V[r]();
+    document.getElementById('authBtn').hidden = S.user;
+    document.querySelectorAll('[data-nav]').forEach(b => b.setAttribute('aria-current', b.dataset.nav === r ? 'page' : 'false'));
+    document.querySelectorAll('[data-cartcount]').forEach(d => { const n = cartCount(); d.textContent = n || ''; });
+    document.querySelectorAll('[data-unread]').forEach(d => { const n = unreadCount(); d.textContent = n || ''; });
+    if (!keepScroll) window.scrollTo(0, 0);
+  }
+  function go(r) { if (location.hash === '#' + r) render(true); else location.hash = r; }
+  function jump(id) {
+    const run = () => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    if (S.route === 'home') run(); else { location.hash = 'home'; setTimeout(run, 120); }
+  }
+  window.addEventListener('hashchange', () => render(false));
+
+  let toastT;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  function setSlide(i) {
+    S.slide = i;
+    document.querySelectorAll('[data-slide]').forEach(s => s.classList.toggle('on', +s.dataset.slide === i));
+    document.querySelectorAll('[data-dot]').forEach(d => d.setAttribute('aria-current', String(+d.dataset.dot === i)));
+  }
+  setInterval(() => { if (S.route === 'home') setSlide((S.slide + 1) % 3); }, 4800);
+
+  // ---------- Events ----------
+  document.addEventListener('click', e => {
+    const t = e.target.closest('button, [data-go], [data-open]');
+    if (!t) return;
+    const d = t.dataset;
+    if (d.jump) { jump(d.jump); return; }
+    if (d.open) { S.cur = d.id || null; if (d.open === 'salon') S.salTab = 'svc'; go(d.open); return; }
+    if (d.book !== undefined) {
+      S.bk = { svc: d.book, staff: 'any', day: 0, dayLabel: '', time: null, addr: 'a1', phone: '', note: '', pay: 'cash', terms: false, step: 1 };
+      ensure(); S.bk.svc = d.book; S.bk.step = 1; go('book'); return;
+    }
+    if (d.go === 'reschedule') { S.rs = { day: 0, dayLabel: '', time: null }; }
+    if (d.bkset !== undefined) { ensure(); S.bk[d.bkset] = d.val; render(true); return; }
+    if (d.bkday !== undefined) { ensure(); S.bk.day = +d.bkday; S.bk.dayLabel = days()[+d.bkday].label; S.bk.isoDate = ''; S.bk.time = null; render(true); return; }
+    if (d.bktime !== undefined) { ensure(); S.bk.time = d.bktime; render(true); return; }
+    if (d.bkback !== undefined) { S.bk.step = Math.max(1, S.bk.step - 1); render(false); return; }
+    if (d.bknext !== undefined) { bookNext(); return; }
+    if (d.rsday !== undefined) { ensure(); S.rs.day = +d.rsday; S.rs.dayLabel = days()[+d.rsday].label; S.rs.isoDate = ''; S.rs.time = null; render(true); return; }
+    if (d.rstime !== undefined) { ensure(); S.rs.time = d.rstime; render(true); return; }
+    if (d.rsok !== undefined) {
+      const bk = S.bookings.find(x => x.id === S.cur);
+      if (!bk || !S.rs.time || !S.rs.dayLabel) { toast('اختاري اليوم والوقت أولاً'); return; }
+      bk.date = S.rs.dayLabel; bk.time = S.rs.time; bk.status = 'wait'; bk.label = 'بانتظار التأكيد';
+      S.rs = { day: 0, dayLabel: '', time: null }; toast('تم تحديث موعدك'); go('booking'); return;
+    }
+    if (d.rate !== undefined) { ensure(); S.rated[d.rate] = +d.val; toast('شكراً لتقييمك'); render(true); return; }
+    if (d.saltab) { S.salTab = d.saltab; render(true); return; }
+    if (d.svcat) { S.svcCat = d.svcat; render(true); return; }
+    if (d.chatsend !== undefined) {
+      const el = document.getElementById('chatIn'); const v = el ? el.value.trim() : '';
+      if (!v) { toast('اكتبي رسالة أولاً'); return; }
+      S.chat.push({ me: true, t: v, at: nowAt() });
+      S.chat.push({ me: false, t: 'شكراً لرسالتك، سنرد عليك في أقرب وقت.', at: nowAt() });
+      render(true); return;
+    }
+    if (d.supsend !== undefined) {
+      const el = document.getElementById('supIn'); const v = el ? el.value.trim() : '';
+      if (!v) { toast('اكتبي رسالة أولاً'); return; }
+      S.support.push({ me: true, t: v, at: nowAt() });
+      S.support.push({ me: false, t: 'تم استلام رسالتك. (نسخة تجريبية)', at: nowAt() });
+      render(true); return;
+    }
+    if (d.ckset !== undefined) { ensure(); S.ck[d.ckset] = d.val; render(true); return; }
+    if (d.coupapply !== undefined) { applyCoupon(); return; }
+    if (d.gal !== undefined) { S.gal = { id: S.cur, i: +d.gal }; go('gallery'); return; }
+    if (d.galnav !== undefined) { galStep(+d.galnav); return; }
+    if (d.galdot !== undefined) { if (S.gal) S.gal.i = +d.galdot; render(true); return; }
+    if (d.mpdist !== undefined) { mpInit(); const q = DISTRICTS[+d.mpdist]; S.mp.x = q.x; S.mp.y = q.y; S.mp.name = q.n; render(true); return; }
+    if (d.mpok !== undefined) {
+      ensure(); mpInit();
+      S.addDraft.line = S.mp.name + (S.mp.detail ? '، ' + S.mp.detail : '') + ' (من الخريطة)';
+      if (!S.addDraft.name) S.addDraft.name = 'موقع من الخريطة';
+      S.addOpen = true; go('addresses'); return;
+    }
+    if (d.emotoggle !== undefined) { S.emoFor = S.emoFor === d.emotoggle ? null : d.emotoggle; render(true); return; }
+    if (d.emoadd !== undefined) { S[d.emokey + 'Draft'] = (S[d.emokey + 'Draft'] || '') + d.emoadd; render(true); return; }
+    if (d.send !== undefined) { sendMsg(d.send); return; }
+    if (d.placeorder !== undefined) { placeOrder(); return; }
+    if (d.addtoggle !== undefined) { ensure(); S.addOpen = !S.addOpen; render(true); return; }
+    if (d.addsave !== undefined) {
+      ensure(); const dr = S.addDraft;
+      if (!dr.name.trim() || !dr.line.trim()) { toast('أدخلي اسم العنوان وتفاصيله'); return; }
+      if (dr.phone.replace(/\D/g, '').length < 10) { toast('أدخلي رقم هاتف صحيح'); return; }
+      S.addrs.push({ id: 'a' + (Date.now() % 100000), name: dr.name.trim(), line: dr.line.trim(), phone: dr.phone.trim() });
+      S.addDraft = { name: '', line: '', phone: '' }; S.addOpen = false; toast('تم حفظ العنوان'); render(true); return;
+    }
+    if (d.addrdel !== undefined) {
+      ensure(); S.addrs = S.addrs.filter(a => a.id !== d.addrdel);
+      if (!S.addrs.some(a => a.id === S.ck.addr)) S.ck.addr = S.addrs[0] ? S.addrs[0].id : '';
+      if (S.bk && !S.addrs.some(a => a.id === S.bk.addr)) S.bk.addr = S.addrs[0] ? S.addrs[0].id : '';
+      toast('تم حذف العنوان'); render(true); return;
+    }
+    if (d.go) { go(d.go); return; }
+    if (d.dot !== undefined) { setSlide(+d.dot); return; }
+    if (d.fav) {
+      const id = d.fav;
+      S.fav.has(id) ? S.fav.delete(id) : S.fav.add(id);
+      toast(S.fav.has(id) ? 'تمت الإضافة إلى المفضلة' : 'تمت الإزالة من المفضلة');
+      render(true); return;
+    }
+    if (d.add) { S.cart[d.add] = (S.cart[d.add] || 0) + 1; toast('أُضيف إلى السلة'); render(true); return; }
+    if (d.qty) {
+      const q = (S.cart[d.qty] || 0) + +d.d;
+      if (q <= 0) delete S.cart[d.qty]; else S.cart[d.qty] = q;
+      render(true); return;
+    }
+    if (d.interest) { S.interest = d.interest; render(true); return; }
+    if (d.storecat) { S.storeCat = d.storecat; render(true); return; }
+    if (d.favtab) { S.favTab = d.favtab; render(true); return; }
+    if (d.booktab) { S.bookTab = d.booktab; S.confirmCancel = null; render(true); return; }
+    if (d.cancelAsk) { S.confirmCancel = d.cancelAsk; render(true); return; }
+    if (d.cancel) {
+      const b = S.bookings.find(x => x.id === d.cancel);
+      if (b) { b.state = 'cancelled'; b.status = 'bad'; b.label = 'ملغى'; }
+      S.confirmCancel = null; toast('تم إلغاء الحجز'); render(true); return;
+    }
+    if (d.confirmNo !== undefined) { S.confirmCancel = null; render(true); return; }
+    if (d.sfilter) { S.sfilter = d.sfilter; render(true); return; }
+    if (d.pay) { S.pay = d.pay; render(true); return; }
+    if (d.coup) { S.coupTab = d.coup; render(true); return; }
+    if (d.notif) { S.notifTab = d.notif; render(true); return; }
+    if (d.pref) { S.prefs[d.pref] = !S.prefs[d.pref]; render(true); return; }
+    if (d.act) {
+      switch (d.act) {
+        case 'auth': go('login'); break;
+        case 'login': S.user = true; toast('أهلاً بكِ'); go('home'); break;
+        case 'logout': S.user = false; toast('تم تسجيل الخروج'); go('home'); break;
+        case 'save': toast('تم حفظ التغييرات'); break;
+        case 'toast': toast(d.msg); break;
+        case 'readall': S.notifs.forEach(n => n.unread = false); toast('تم تعليم الكل كمقروء'); render(true); break;
+        case 'checkout': go('checkout'); break;
+      }
+      return;
+    }
+  });
+
+  document.addEventListener('input', e => {
+    if (e.target.id === 'q') {
+      S.q = e.target.value;
+      const box = document.getElementById('results');
+      if (box) box.innerHTML = resultsHTML();
+    }
+  });
+
+  document.addEventListener('submit', e => {
+    if (e.target.id === 'loginForm') { e.preventDefault(); S.user = true; toast('أهلاً بكِ'); go('home'); }
+    if (e.target.id === 'acct') e.preventDefault();
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.id === 'storeSearch') return;
+  });
+
+  // Store search: lightweight filter on product names
+  document.addEventListener('input', e => {
+    if (e.target.id !== 'storeSearch') return;
+    const q = e.target.value.trim();
+    document.querySelectorAll('.grid .card.item h3').forEach(h => {
+      const card = h.closest('.card');
+      card.style.display = !q || h.textContent.includes(q) ? '' : 'none';
+    });
+  });
+
+  // ---------- Helpers for the new screens ----------
+  const nowAt = () => new Date().toLocaleTimeString('ar', { hour: 'numeric', minute: '2-digit' });
+  const pickDate = v => {
+    if (!v) return null;
+    const d = new Date(v + 'T00:00:00');
+    return isNaN(d) ? null : dayLabelOf(d);
+  };
+  const phoneOk = p => (p || '').replace(/\D/g, '').length >= 10;
+
+  function bookNext() {
+    ensure();
+    const b = S.bk;
+    if (b.step === 2 && !b.time) { toast('اختاري الوقت أولاً'); return; }
+    if (b.step === 3 && !phoneOk(b.phone)) { toast('أدخلي رقم هاتف صحيح'); return; }
+    if (b.step < 4) { b.step++; render(false); return; }
+    if (!b.terms) { toast('يرجى الموافقة على الشروط'); return; }
+    const svc = SERVICES.find(x => x.id === b.svc) || SERVICES[0];
+    const staff = b.staff === 'any' ? 'أي موظفة متاحة' : ((STAFF.find(s => s.id === b.staff) || {}).name || '—');
+    const addr = S.addrs.find(a => a.id === b.addr) || S.addrs[0];
+    const id = 'BZ-' + (1300 + S.bookings.length + 1);
+    S.bookings.unshift({
+      id, svc: svc.name, center: svc.center, date: b.dayLabel || days()[0].label, time: b.time,
+      dur: svc.dur, price: svc.price, state: 'upcoming', status: 'wait', label: 'بانتظار التأكيد',
+      hue: svc.hue, staff, addr: addr ? addr.line : '', note: b.note, pay: b.pay
+    });
+    S.lastBk = id; S.bk = null;
+    toast('تم إرسال طلب الحجز');
+    go('bookdone');
+  }
+
+  function placeOrder() {
+    ensure();
+    if (!S.ck.terms) { toast('يرجى الموافقة على الشروط'); return; }
+    const lines = Object.entries(S.cart).map(([id, q]) => ({ p: PRODUCTS.find(x => x.id === id), q })).filter(x => x.p);
+    if (!lines.length) { go('store'); return; }
+    const sub = lines.reduce((a, l) => a + l.p.price * l.q, 0);
+    const ship = S.ck.del === 'exp' ? 5000 : 2000;
+    const disc = discountFor(sub);
+    const addr = S.addrs.find(a => a.id === S.ck.addr) || S.addrs[0];
+    const id = '#' + (1257 + S.orders.length);
+    S.orders.unshift({
+      id, date: dayLabelOf(new Date()), items: lines.map(l => `${l.p.name} × ${l.q}`),
+      total: sub + ship - disc, state: 'قيد التجهيز', st: 'wait', hue: lines[0].p.hue, addr: addr ? addr.line : ''
+    });
+    if (S.ck.code) (S.usedCodes = S.usedCodes || []).push(S.ck.code);
+    S.lastOrder = id; S.cart = {}; S.ck = { addr: S.ck.addr, del: 'std', pay: 'cash', coupon: '', disc: 0, note: '', terms: false };
+    toast('تم استلام الطلب');
+    go('ordersuccess');
+  }
+
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.bkin !== undefined) { ensure(); S.bk[t.dataset.bkin] = t.value; return; }
+    if (t.dataset.adin !== undefined) { ensure(); S.addDraft[t.dataset.adin] = t.value; return; }
+    if (t.dataset.ckin !== undefined) { ensure(); S.ck[t.dataset.ckin] = t.value; return; }
+  });
+
+  document.addEventListener('change', e => {
+    const t = e.target;
+    ensure();
+    if (t.dataset.bkdate !== undefined) {
+      const lbl = pickDate(t.value);
+      if (lbl) { S.bk.day = -1; S.bk.dayLabel = lbl; S.bk.isoDate = t.value; S.bk.time = null; render(true); }
+      return;
+    }
+    if (t.dataset.rsdate !== undefined) {
+      const lbl = pickDate(t.value);
+      if (lbl) { S.rs.day = -1; S.rs.dayLabel = lbl; S.rs.isoDate = t.value; S.rs.time = null; render(true); }
+      return;
+    }
+    if (t.dataset.bkterms !== undefined) { S.bk.terms = t.checked; return; }
+    if (t.dataset.ckterms !== undefined) { S.ck.terms = t.checked; return; }
+  });
+
+  render(false);
+  setSlide(0);
+})();
+</script>
